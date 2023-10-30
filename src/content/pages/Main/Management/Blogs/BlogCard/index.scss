@@ -1,0 +1,26 @@
+.blog-container {
+  padding: 20px;
+
+  a {
+    cursor: pointer;
+    font-weight: bolder;
+    letter-spacing: 0.5px;
+    padding: 5px;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 1; /* number of lines to show */
+    line-clamp: 1;
+    -webkit-box-orient: vertical;
+  }
+
+  p {
+    padding-inline: 5px;
+    font-family: Roboto;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 3; /* number of lines to show */
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    font-size: 12px;
+  }
+}
