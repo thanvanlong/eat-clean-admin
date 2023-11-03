@@ -12,20 +12,23 @@ import { GlobalContext } from './contexts/GlobalContext';
 
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import CustomProvider from './redux/provider';
 
 function App() {
   const content = useRoutes(router);
   const { gError } = useContext(GlobalContext);
 
   return (
-    <ThemeProvider>
-      <LocalizationProvider dateAdapter={AdapterDateFns}>
-        <CssBaseline />
-        {content}
-        {!gError.isError && <ToastContainer />}
-        <GlobalErrorDialog />
-      </LocalizationProvider>
-    </ThemeProvider>
+    <CustomProvider>
+      <ThemeProvider>
+        <LocalizationProvider dateAdapter={AdapterDateFns}>
+          <CssBaseline />
+          {content}
+          {!gError.isError && <ToastContainer />}
+          <GlobalErrorDialog />
+        </LocalizationProvider>
+      </ThemeProvider>
+    </CustomProvider>
   );
 }
 export default App;
