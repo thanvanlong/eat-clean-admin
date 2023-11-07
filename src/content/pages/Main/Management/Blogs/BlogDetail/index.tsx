@@ -5,7 +5,7 @@ import Editor from "./Editor";
 import {Helmet} from "react-helmet-async";
 import PageTitleWrapper from "../../../../../../components/PageTitleWrapper";
 import PageHeader from "./PageHeader";
-import {Card, Typography} from "@mui/material";
+import {Backdrop, Card, CircularProgress, Typography} from "@mui/material";
 import type { UploadProps } from 'antd';
 import {message, Upload, Form, Input, Modal, Button} from 'antd';
 import CloudUploadOutlinedIcon from '@mui/icons-material/CloudUploadOutlined';
@@ -13,14 +13,21 @@ import ImgCrop from "antd-img-crop";
 import {UploadFile} from "antd/es/upload/interface";
 import {RcFile} from "antd/es/upload";
 import TextArea from "antd/es/input/TextArea";
+import {createProduct} from "../../../../../../redux/features/productSlice";
+import {useAppDispatch} from "../../../../../../redux/hooks";
 
 function BlogDetail() {
     const [previewOpen, setPreviewOpen] = useState(false);
     const [previewImage, setPreviewImage] = useState('');
+    const [content, setContent] = useState('');
     const [previewTitle, setPreviewTitle] = useState('');
     const [fileList, setFileList] = useState<UploadFile[]>([]);
-
+    const [open, setOpen] = useState(false);
     const handleCancel = () => setPreviewOpen(false);
+
+    const handle = (e) => {
+        setContent(e)
+    }
 
     const handlePreview = async (file: UploadFile) => {
         if (!file.url && !file.preview) {
@@ -34,7 +41,6 @@ function BlogDetail() {
 
     const handleChange: UploadProps['onChange'] = ({ fileList: newFileList }) => {
         setFileList(newFileList);
-        console.log(newFileList[0])
     }
     const getBase64 = (file: RcFile): Promise<string> =>
         new Promise((resolve, reject) => {
@@ -51,6 +57,26 @@ function BlogDetail() {
             <div style={{ marginTop: 8 }}>Upload</div>
         </div>
     );
+
+    const dispatch = useAppDispatch()
+    const handleSubmit = (e) => {
+        let formData = new FormData();    //formdata object
+
+        for (const key of Object.keys(e)) {
+            if (key !== "files") {
+                formData.append(key, e[key]);
+            }
+            else {
+                e[key].fileList.forEach((item) => {
+                    formData.append(key, item.originFileObj)
+                });
+            }
+        }
+        formData.append("content", content)
+        setOpen(true)
+        dispatch(createProduct(formData)).then(() => {setOpen(false)})
+    }
+
     return (
         <div>
             <Helmet>Create - Blogs</Helmet>
@@ -79,24 +105,22 @@ function BlogDetail() {
                             name="image"
                             rules={[{ required: true, message: 'Please input image!' }]}
                         >
-                            <ImgCrop showGrid rotationSlider aspectSlider showReset>
-                                <Upload
-                                    action="https://run.mocky.io/v3/435e224c-44fb-4773-9faf-380c5e6a2188"
-                                    listType="picture-card"
-                                    fileList={fileList}
-                                    onPreview={handlePreview}
-                                    onChange={handleChange}
-                                    beforeUpload={(file) => {
-                                        const isPNG = file.type === 'image/png';
-                                        if (!isPNG) {
-                                            message.error(`${file.name} is not a png file`);
-                                        }
-                                        return isPNG || Upload.LIST_IGNORE;
-                                    }}
-                                >
-                                    {fileList.length >= 1 ? null : uploadButton}
-                                </Upload>
-                            </ImgCrop>
+                            <Upload
+                                action="https://run.mocky.io/v3/435e224c-44fb-4773-9faf-380c5e6a2188"
+                                listType="picture-card"
+                                fileList={fileList}
+                                onPreview={handlePreview}
+                                onChange={handleChange}
+                                beforeUpload={(file) => {
+                                    const isPNG = file.type === 'image/png';
+                                    if (!isPNG) {
+                                        message.error(`${file.name} is not a png file`);
+                                    }
+                                    return isPNG || Upload.LIST_IGNORE;
+                                }}
+                            >
+                                {fileList.length >= 1 ? null : uploadButton}
+                            </Upload>
                         </Form.Item>
                         <Modal open={previewOpen} title={previewTitle} footer={null} onCancel={handleCancel}>
                             <img alt="example" style={{ width: '100%' }} src={previewImage} />
@@ -104,7 +128,7 @@ function BlogDetail() {
                     </div>
                     <div>
                         <Typography fontWeight={'bold'} sx={{mb: 1}}>Blogs</Typography>
-                        <Editor />
+                        <Editor handle={(e) => handle(e)}/>
                     </div>
                     <div className={'w-full flex justify-center'}>
                         <Button type="primary" htmlType="submit">
@@ -113,6 +137,9 @@ function BlogDetail() {
                     </div>
                 </Form>
             </Card>
+            <Backdrop open={open}>
+                <CircularProgress />
+            </Backdrop>
         </div>
     );
 }

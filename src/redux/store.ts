@@ -14,7 +14,7 @@ import {
 
 import storage from 'redux-persist/lib/storage';
 import authSlice from './features/authSlice';
-import productSlice from '@/redux/features/productSlice';
+import productSlice from '../redux/features/productSlice';
 
 const persistConfig = {
   key: 'root',

@@ -5,6 +5,7 @@ export interface IUser {
   phone: string;
   email: string;
   avatar: string;
+  roles: string[];
 }
 
 export interface IToken {

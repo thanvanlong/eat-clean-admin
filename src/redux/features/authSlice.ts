@@ -1,7 +1,7 @@
-import authApi from '@/api/authApi';
-import { toastOption } from '@/configs/notification.config';
-import { LoadingStatus } from '@/enums/enum';
-import { ILoginData, IRegisterData, IUser } from '@/interfaces';
+import authApi from '../../api/authApi';
+import { toastOption } from '../../configs/notification.config';
+import { LoadingStatus } from '../../enums/enum';
+import { ILoginData, IRegisterData, IUser } from '../../interfaces';
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { toast } from 'react-toastify';
 
@@ -48,9 +48,6 @@ const authSlice = createSlice({
     builder
       .addCase(requestLogin.fulfilled, (state, action) => {
         if (action.payload == null) return;
-        const { accessToken, ...rest } = action.payload;
-        // state.currentUser = rest;
-        // state.accessToken = accessToken;
       })
       .addMatcher(
         (action) => action.type.includes('rejected'),

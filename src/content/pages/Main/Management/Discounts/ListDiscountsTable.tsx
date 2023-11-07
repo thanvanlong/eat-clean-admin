@@ -26,21 +26,12 @@ import {
 } from '@mui/material';
 
 import Label from 'src/components/Label';
-import { CryptoOrder, CryptoOrderStatus } from 'src/models/crypto_order';
 import EditTwoToneIcon from '@mui/icons-material/EditTwoTone';
 import DeleteTwoToneIcon from '@mui/icons-material/DeleteTwoTone';
 import BulkActions from './BulkActions';
 
-interface RecentOrdersTableProps {
-  className?: string;
-  cryptoOrders: CryptoOrder[];
-}
 
-interface Filters {
-  status?: CryptoOrderStatus;
-}
-
-const getStatusLabel = (cryptoOrderStatus: CryptoOrderStatus): JSX.Element => {
+const getStatusLabel = (cryptoOrderStatus: any): JSX.Element => {
   const map = {
     failed: {
       text: 'Failed',
@@ -61,39 +52,23 @@ const getStatusLabel = (cryptoOrderStatus: CryptoOrderStatus): JSX.Element => {
   return <Label color={color}>{text}</Label>;
 };
 
-const applyFilters = (
-  cryptoOrders: CryptoOrder[],
-  filters: Filters
-): CryptoOrder[] => {
-  return cryptoOrders.filter((cryptoOrder) => {
-    let matches = true;
 
-    if (filters.status && cryptoOrder.status !== filters.status) {
-      matches = false;
-    }
 
-    return matches;
-  });
-};
+// const applyPagination = (
+//   cryptoOrders: CryptoOrder[],
+//   page: number,
+//   limit: number
+// ): CryptoOrder[] => {
+//   return cryptoOrders.slice(page * limit, page * limit + limit);
+// };
 
-const applyPagination = (
-  cryptoOrders: CryptoOrder[],
-  page: number,
-  limit: number
-): CryptoOrder[] => {
-  return cryptoOrders.slice(page * limit, page * limit + limit);
-};
-
-const ListDiscountsTable: FC<RecentOrdersTableProps> = ({ cryptoOrders }) => {
+const ListDiscountsTable = ({ cryptoOrders }) => {
   const [selectedCryptoOrders, setSelectedCryptoOrders] = useState<string[]>(
     []
   );
   const selectedBulkActions = selectedCryptoOrders.length > 0;
   const [page, setPage] = useState<number>(0);
   const [limit, setLimit] = useState<number>(5);
-  const [filters, setFilters] = useState<Filters>({
-    status: null
-  });
 
   const statusOptions = [
     {
@@ -115,16 +90,16 @@ const ListDiscountsTable: FC<RecentOrdersTableProps> = ({ cryptoOrders }) => {
   ];
 
   const handleStatusChange = (e: ChangeEvent<HTMLInputElement>): void => {
-    let value = null;
-
-    if (e.target.value !== 'all') {
-      value = e.target.value;
-    }
-
-    setFilters((prevFilters) => ({
-      ...prevFilters,
-      status: value
-    }));
+    // let value = null;
+    //
+    // if (e.target.value !== 'all') {
+    //   value = e.target.value;
+    // }
+    //
+    // setFilters((prevFilters) => ({
+    //   ...prevFilters,
+    //   status: value
+    // }));
   };
 
   const handleSelectAllCryptoOrders = (
@@ -161,12 +136,6 @@ const ListDiscountsTable: FC<RecentOrdersTableProps> = ({ cryptoOrders }) => {
     setLimit(parseInt(event.target.value));
   };
 
-  const filteredCryptoOrders = applyFilters(cryptoOrders, filters);
-  const paginatedCryptoOrders = applyPagination(
-    filteredCryptoOrders,
-    page,
-    limit
-  );
   const selectedSomeCryptoOrders =
     selectedCryptoOrders.length > 0 &&
     selectedCryptoOrders.length < cryptoOrders.length;
@@ -187,18 +156,7 @@ const ListDiscountsTable: FC<RecentOrdersTableProps> = ({ cryptoOrders }) => {
             <Box width={150}>
               <FormControl fullWidth variant="outlined">
                 <InputLabel>Status</InputLabel>
-                <Select
-                  value={filters.status || 'all'}
-                  onChange={handleStatusChange}
-                  label="Status"
-                  autoWidth
-                >
-                  {statusOptions.map((statusOption) => (
-                    <MenuItem key={statusOption.id} value={statusOption.id}>
-                      {statusOption.name}
-                    </MenuItem>
-                  ))}
-                </Select>
+
               </FormControl>
             </Box>
           }
@@ -227,7 +185,7 @@ const ListDiscountsTable: FC<RecentOrdersTableProps> = ({ cryptoOrders }) => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {paginatedCryptoOrders.map((cryptoOrder) => {
+            {[].map((cryptoOrder) => {
               const isCryptoOrderSelected = selectedCryptoOrders.includes(
                 cryptoOrder.id
               );
@@ -344,7 +302,7 @@ const ListDiscountsTable: FC<RecentOrdersTableProps> = ({ cryptoOrders }) => {
       <Box p={2}>
         <TablePagination
           component="div"
-          count={filteredCryptoOrders.length}
+          count={1}
           onPageChange={handlePageChange}
           onRowsPerPageChange={handleLimitChange}
           page={page}

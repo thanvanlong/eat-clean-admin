@@ -9,13 +9,14 @@ Quill.register("modules/imageUploader", ImageUploader);
 class Editor extends Component {
     constructor(props) {
         super(props);
-        this.state = { editorHtml: "" };
+        this.state = { editorHtml: this.props.data};
         this.handleChange = this.handleChange.bind(this);
         this.textInput = React.createRef();
     }
 
     handleChange(html) {
-        console.log(html)
+        this.props.handle(html)
+        // console.log(html)
         this.setState({ editorHtml: html });
     }
 

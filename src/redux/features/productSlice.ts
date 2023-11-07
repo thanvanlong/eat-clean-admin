@@ -1,11 +1,13 @@
-import authApi from '@/api/authApi';
-import { toastOption } from '@/configs/notification.config';
-import { LoadingStatus } from '@/enums/enum';
-import { ILoginData, IRegisterData, IUser } from '@/interfaces';
+
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { toast } from 'react-toastify';
-import { IProduct } from '@/interfaces/product.interface';
-import productApi from '@/api/productApi';
+import productApi from "../../api/productApi";
+import {IRegisterData} from "../../interfaces";
+import authApi from "../../api/authApi";
+import {ICategory, IComment, IProduct} from "../../interfaces/product.interface";
+import {LoadingStatus} from "../../enums/enum";
+import {toastOption} from "../../configs/notification.config";
+
 
 export const getProductByPage = createAsyncThunk(
   'products/get',
@@ -16,6 +18,36 @@ export const getProductByPage = createAsyncThunk(
       throw { message: response.message, errorCode: response.errorCode };
     return response.data;
   }
+);
+
+export const getCategory = createAsyncThunk(
+    "products/category",
+    async (thunkAPI) => {
+        const response = await productApi.getCategory()
+        if (!response.success)
+            throw { message: response.message, errorCode: response.errorCode };
+        return response.data;
+    }
+);
+
+export const getProductById = createAsyncThunk(
+    "get",
+    async (input: number, thunkAPI) => {
+        const response = await productApi.getOne(input)
+        if (!response.success)
+            throw { message: response.message, errorCode: response.errorCode };
+        return response.data;
+    }
+);
+
+export const createProduct = createAsyncThunk(
+    "products/create",
+    async (input: FormData, thunkAPI) => {
+        const response = await productApi.createProduct(input)
+        if (!response.success)
+            throw { message: response.message, errorCode: response.errorCode };
+        return response.data;
+    }
 );
 
 export const requestRegister = createAsyncThunk(
@@ -29,17 +61,21 @@ export const requestRegister = createAsyncThunk(
 );
 
 export interface ProductState {
-  products: IProduct[] | null;
-  error: ErrorResponse | null;
-  loading: LoadingStatus;
-  metadata: IMetadata | null;
+    products: IProduct[] | null;
+    product: IProduct | null;
+    categories: ICategory[] | null;
+    error: ErrorResponse | null;
+    loading: LoadingStatus;
+    metadata: IMetadata | null;
 }
 
 const initialState: ProductState = {
-  products: null,
-  error: null,
-  loading: LoadingStatus.Pending,
-  metadata: null
+    products: null,
+    product: null,
+    categories: null,
+    error: null,
+    loading: LoadingStatus.Pending,
+    metadata: null,
 };
 
 const productSlice = createSlice({
@@ -53,6 +89,14 @@ const productSlice = createSlice({
         state.products = action.payload.results;
         state.metadata = action.payload.metadata;
       })
+        .addCase(getCategory.fulfilled, (state, action) => {
+            if (action.payload == null) return;
+            state.categories = action.payload;
+        })
+        .addCase(getProductById.fulfilled, (state, action) => {
+            if (action.payload == null) return;
+            state.product = action.payload;
+        })
       .addMatcher(
         (action) => action.type.includes('rejected'),
         (state, action) => {

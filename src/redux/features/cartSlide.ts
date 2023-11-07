@@ -1,7 +1,8 @@
-import { toastOption } from '@/configs/notification.config';
-import { LoadingStatus } from '@/enums/enum';
+
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { toast } from 'react-toastify';
+import {LoadingStatus} from "../../enums/enum";
+import {toastOption} from "../../configs/notification.config";
 
 export const addItem = createAsyncThunk(
   'cart/add',

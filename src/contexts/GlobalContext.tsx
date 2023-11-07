@@ -13,7 +13,6 @@ type GlobalContext = {
   setLoginUser: (user: User) => void;
 };
 
-// eslint-disable-next-line @typescript-eslint/no-redeclare
 export const GlobalContext = createContext<GlobalContext>({} as GlobalContext);
 
 export const GlobalContextProvider: FC = ({ children }) => {

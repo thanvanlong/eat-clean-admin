@@ -1,4 +1,4 @@
-import { IUser } from '@/interfaces/auth.interface';
+import { IUser } from '../interfaces/auth.interface';
 
 export interface IProduct {
   id: string;
@@ -15,6 +15,7 @@ export interface IProduct {
 export interface ICategory {
   id: number;
   label: string;
+  key: string;
 }
 
 export interface IComment {

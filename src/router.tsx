@@ -7,7 +7,7 @@ import BaseLayout from 'src/layouts/BaseLayout';
 
 import SuspenseLoader from 'src/components/SuspenseLoader';
 
-const login = localStorage.getItem('login');
+const login = localStorage.getItem('token');
 
 const getElement = (element: any) => {
   return true ? element : <Navigate to="/" replace />;
@@ -35,6 +35,11 @@ const ManageProductDetail = Loader(
     lazy(() => import('src/content/pages/Main/Management/Products/Details/index'))
 )
 
+
+const ManageProductEdit = Loader(
+    lazy(() => import('src/content/pages/Main/Management/Products/Edit/index'))
+)
+
 const ManageUser = Loader(
     lazy(() => import('src/content/pages/Main/Management/Users/index'))
 )
@@ -59,12 +64,6 @@ const ManageDiscountDetail = Loader(
 const Login = Loader(
   lazy(() => import('src/content/pages/Main/Account/Login'))
 );
-const Logout = Loader(
-  lazy(() => import('src/content/pages/Main/Account/Logout'))
-);
-const Info = Loader(
-  lazy(() => import('src/content/pages/Main/Account/Infomation'))
-);
 
 // Status
 const Status404 = Loader(
@@ -78,15 +77,11 @@ const routes: RouteObject[] = [
     children: [
       {
         path: '/',
-        element: false ? (
-          <Login />
-        ) : (
-          <Navigate to="/dashboards/overview" replace />
-        )
+        element: login ? <Navigate to={'/dashboards/overview'} /> : <Login />
       },
       {
         path: 'login',
-        element: <Navigate to="/" replace />
+        element: login ? <Navigate to={'/dashboards/overview'} /> : <Login />
       },
       {
         path: '*',
@@ -125,8 +120,12 @@ const routes: RouteObject[] = [
         element: getElement(<ManageProduct />)
       },
       {
-        path: 'product/:id',
+        path: 'product/create',
         element: getElement(<ManageProductDetail />)
+      },
+      {
+        path: 'product/edit/:id',
+        element: getElement(<ManageProductEdit />)
       },
       {
         path: 'user',
@@ -157,14 +156,6 @@ const routes: RouteObject[] = [
       {
         path: '',
         element: <Navigate to="infomation" replace />
-      },
-      {
-        path: 'infomation',
-        element: getElement(<Info />)
-      },
-      {
-        path: 'logout',
-        element: getElement(<Logout />)
       }
     ]
   }

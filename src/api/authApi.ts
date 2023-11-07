@@ -1,5 +1,6 @@
-import { ILoginData, IRegisterData, IToken, IUser } from "@/interfaces";
+
 import Api from "./api";
+import { ILoginData, IRegisterData, IToken, IUser } from "../interfaces";
 
 class AuthApi {
   private baseUrl: string;

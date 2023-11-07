@@ -14,9 +14,7 @@ class Api {
     instance.interceptors.request.use(
       async (config: InternalAxiosRequestConfig) => {
         if (localStorage.getItem("token")) {
-          config.headers["Authorization"] = `Bearer ${JSON.parse(
-            localStorage.getItem("token") ?? ""
-          )}`;
+          config.headers["Authorization"] = `Bearer ` + localStorage.getItem("token") ?? "";
         }
         return config;
       },
@@ -51,7 +49,7 @@ class Api {
 
   private getConfig() {
     return {
-      baseURL: "http://localhost:8080/api/v1",
+      baseURL: "http://localhost:8081/api/v1",
       headers: {
         // ContentType: "application/json",
         // // ContentType: 'multipart/form-data',
