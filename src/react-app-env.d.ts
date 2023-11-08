@@ -22,9 +22,9 @@ interface ApiListResponse<T> {
 }
 
 interface IMetadata {
-  pageNumber: number;
-  pageSize: number;
-  totalPages: number;
+  pageNumber?: number;
+  pageSize?: number;
+  totalPages?: number;
   currentPage?: number;
 }
 

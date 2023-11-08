@@ -1,8 +1,8 @@
 import axios, {
   AxiosInstance,
   AxiosResponse,
-  InternalAxiosRequestConfig,
-} from "axios";
+  InternalAxiosRequestConfig
+} from 'axios';
 
 class Api {
   private async AXIOS(): Promise<AxiosInstance> {
@@ -13,8 +13,9 @@ class Api {
 
     instance.interceptors.request.use(
       async (config: InternalAxiosRequestConfig) => {
-        if (localStorage.getItem("token")) {
-          config.headers["Authorization"] = `Bearer ` + localStorage.getItem("token") ?? "";
+        if (localStorage.getItem('token')) {
+          config.headers['Authorization'] =
+            `Bearer ` + localStorage.getItem('token') ?? '';
         }
         return config;
       },
@@ -32,11 +33,11 @@ class Api {
         if (error?.response?.status === 401 && !originalRequest._retry) {
           // Kiểm tra mã trạng thái 401 (Unauthorized) và chưa thử lại request
           // Gửi yêu cầu refresh token để lấy token mới
-          const newToken = "";
+          const newToken = '';
           if (newToken) {
             // Thử lại request ban đầu với token mới
             originalRequest._retry = true;
-            originalRequest.headers["Authorization"] = `Bearer ${newToken}`;
+            originalRequest.headers['Authorization'] = `Bearer ${newToken}`;
             return axios(originalRequest);
           }
         }
@@ -49,12 +50,12 @@ class Api {
 
   private getConfig() {
     return {
-      baseURL: "http://localhost:8080/api/v1",
+      baseURL: 'http://localhost:8080/api/v1',
       headers: {
         // ContentType: "application/json",
         // // ContentType: 'multipart/form-data',
         // Accept: "application/json",
-      },
+      }
     };
   }
 

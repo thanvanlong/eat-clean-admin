@@ -1,4 +1,4 @@
-import { FC, ChangeEvent, useState } from 'react';
+import { FC, ChangeEvent, useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import numeral from 'numeral';
 import PropTypes from 'prop-types';
@@ -29,9 +29,13 @@ import Label from 'src/components/Label';
 import EditTwoToneIcon from '@mui/icons-material/EditTwoTone';
 import DeleteTwoToneIcon from '@mui/icons-material/DeleteTwoTone';
 import BulkActions from './BulkActions';
+import { useAppDispatch, useAppSelector } from 'src/redux/hooks';
+import { RootState } from 'src/redux/store';
+import { getAllDiscounts } from 'src/redux/features/discountSlice';
+import { IDiscounts } from 'src/interfaces/discounts.interface';
+import { Link } from 'react-router-dom';
 
-
-const getStatusLabel = (cryptoOrderStatus: any): JSX.Element => {
+const getStatusLabel = (discountstatus: any): JSX.Element => {
   const map = {
     failed: {
       text: 'Failed',
@@ -47,83 +51,42 @@ const getStatusLabel = (cryptoOrderStatus: any): JSX.Element => {
     }
   };
 
-  const { text, color }: any = map[cryptoOrderStatus];
+  const { text, color }: any = map[discountstatus];
 
   return <Label color={color}>{text}</Label>;
 };
 
-
-
 // const applyPagination = (
-//   cryptoOrders: CryptoOrder[],
+//   Discounts: discount[],
 //   page: number,
 //   limit: number
-// ): CryptoOrder[] => {
-//   return cryptoOrders.slice(page * limit, page * limit + limit);
+// ): discount[] => {
+//   return Discounts.slice(page * limit, page * limit + limit);
 // };
 
-const ListDiscountsTable = ({ cryptoOrders }) => {
-  const [selectedCryptoOrders, setSelectedCryptoOrders] = useState<string[]>(
-    []
-  );
-  const selectedBulkActions = selectedCryptoOrders.length > 0;
+const ListDiscountsTable = () => {
+  const [selectedDiscounts, setSelectedDiscounts] = useState<number[]>([]);
+  const selectedBulkActions = selectedDiscounts.length > 0;
   const [page, setPage] = useState<number>(0);
-  const [limit, setLimit] = useState<number>(5);
+  const [limit, setLimit] = useState<number>(10);
 
-  const statusOptions = [
-    {
-      id: 'all',
-      name: 'All'
-    },
-    {
-      id: 'completed',
-      name: 'Completed'
-    },
-    {
-      id: 'pending',
-      name: 'Pending'
-    },
-    {
-      id: 'failed',
-      name: 'Failed'
-    }
-  ];
+  const dispatch = useAppDispatch();
 
-  const handleStatusChange = (e: ChangeEvent<HTMLInputElement>): void => {
-    // let value = null;
-    //
-    // if (e.target.value !== 'all') {
-    //   value = e.target.value;
-    // }
-    //
-    // setFilters((prevFilters) => ({
-    //   ...prevFilters,
-    //   status: value
-    // }));
-  };
+  useEffect(() => {
+    dispatch(getAllDiscounts({ limit: limit, page: page }));
+  }, []);
 
-  const handleSelectAllCryptoOrders = (
-    event: ChangeEvent<HTMLInputElement>
-  ): void => {
-    setSelectedCryptoOrders(
-      event.target.checked
-        ? cryptoOrders.map((cryptoOrder) => cryptoOrder.id)
-        : []
-    );
-  };
+  const data = useAppSelector((root: RootState) => root.discount);
 
-  const handleSelectOneCryptoOrder = (
+  const handleSelectOneDiscount = (
     event: ChangeEvent<HTMLInputElement>,
-    cryptoOrderId: string
+    discountId: number
   ): void => {
-    if (!selectedCryptoOrders.includes(cryptoOrderId)) {
-      setSelectedCryptoOrders((prevSelected) => [
-        ...prevSelected,
-        cryptoOrderId
-      ]);
+    if (!selectedDiscounts.includes(discountId)) {
+      setSelectedDiscounts((prevSelected) => [...prevSelected, discountId]);
     } else {
-      setSelectedCryptoOrders((prevSelected) =>
-        prevSelected.filter((id) => id !== cryptoOrderId)
+      setSelectedDiscounts((prevSelected) =>
+        prevSelected.filter((id) => id !== discountId)
       );
     }
   };
@@ -136,166 +99,157 @@ const ListDiscountsTable = ({ cryptoOrders }) => {
     setLimit(parseInt(event.target.value));
   };
 
-  const selectedSomeCryptoOrders =
-    selectedCryptoOrders.length > 0 &&
-    selectedCryptoOrders.length < cryptoOrders.length;
-  const selectedAllCryptoOrders =
-    selectedCryptoOrders.length === cryptoOrders.length;
+  // const selectedSomeDiscounts =
+  //   selectedDiscounts.length > 0 && selectedDiscounts.length < Discounts.length;
+  // const selectedAllDiscounts = selectedDiscounts.length === Discounts.length;
   const theme = useTheme();
 
   return (
     <Card>
-      {selectedBulkActions && (
-        <Box flex={1} p={2}>
-          <BulkActions />
-        </Box>
-      )}
-      {!selectedBulkActions && (
-        <CardHeader
-          action={
-            <Box width={150}>
-              <FormControl fullWidth variant="outlined">
-                <InputLabel>Status</InputLabel>
+      <CardHeader action={<Box width={150}></Box>} title="Mã giảm giá" />
 
-              </FormControl>
-            </Box>
-          }
-          title="Recent Orders"
-        />
-      )}
       <Divider />
       <TableContainer>
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell padding="checkbox">
-                <Checkbox
-                  color="primary"
-                  checked={selectedAllCryptoOrders}
-                  indeterminate={selectedSomeCryptoOrders}
-                  onChange={handleSelectAllCryptoOrders}
-                />
-              </TableCell>
-              <TableCell>Order Details</TableCell>
-              <TableCell>Order ID</TableCell>
-              <TableCell>Source</TableCell>
-              <TableCell align="right">Amount</TableCell>
-              <TableCell align="right">Status</TableCell>
-              <TableCell align="right">Actions</TableCell>
+              <TableCell align="center">ID</TableCell>
+              <TableCell align="center">Tên mã giảm giá</TableCell>
+              <TableCell align="center">Mã</TableCell>
+              <TableCell align="center">Giảm (%)</TableCell>
+              <TableCell align="center">Số lượng</TableCell>
+              <TableCell align="center">Ngày bắt đầu</TableCell>
+              <TableCell align="center">Ngày kết thúc</TableCell>
+              <TableCell align="center">Hành động</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {[].map((cryptoOrder) => {
-              const isCryptoOrderSelected = selectedCryptoOrders.includes(
-                cryptoOrder.id
-              );
-              return (
-                <TableRow
-                  hover
-                  key={cryptoOrder.id}
-                  selected={isCryptoOrderSelected}
-                >
-                  <TableCell padding="checkbox">
-                    <Checkbox
-                      color="primary"
-                      checked={isCryptoOrderSelected}
-                      onChange={(event: ChangeEvent<HTMLInputElement>) =>
-                        handleSelectOneCryptoOrder(event, cryptoOrder.id)
-                      }
-                      value={isCryptoOrderSelected}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Typography
-                      variant="body1"
-                      fontWeight="bold"
-                      color="text.primary"
-                      gutterBottom
-                      noWrap
-                    >
-                      {cryptoOrder.orderDetails}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" noWrap>
-                      {format(cryptoOrder.orderDate, 'MMMM dd yyyy')}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Typography
-                      variant="body1"
-                      fontWeight="bold"
-                      color="text.primary"
-                      gutterBottom
-                      noWrap
-                    >
-                      {cryptoOrder.orderID}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Typography
-                      variant="body1"
-                      fontWeight="bold"
-                      color="text.primary"
-                      gutterBottom
-                      noWrap
-                    >
-                      {cryptoOrder.sourceName}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" noWrap>
-                      {cryptoOrder.sourceDesc}
-                    </Typography>
-                  </TableCell>
-                  <TableCell align="right">
-                    <Typography
-                      variant="body1"
-                      fontWeight="bold"
-                      color="text.primary"
-                      gutterBottom
-                      noWrap
-                    >
-                      {cryptoOrder.amountCrypto}
-                      {cryptoOrder.cryptoCurrency}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" noWrap>
-                      {numeral(cryptoOrder.amount).format(
-                        `${cryptoOrder.currency}0,0.00`
-                      )}
-                    </Typography>
-                  </TableCell>
-                  <TableCell align="right">
-                    {getStatusLabel(cryptoOrder.status)}
-                  </TableCell>
-                  <TableCell align="right">
-                    {cryptoOrder.status.toLocaleLowerCase() != "completed"
-                        ? <Tooltip title="Edit Order" arrow>
-                      <IconButton
+            {Boolean(data.discounts.length) ? (
+              data.discounts?.map((discount: IDiscounts) => {
+                const isDiscountselected = selectedDiscounts.includes(
+                  discount.id
+                );
+                return (
+                  <TableRow
+                    hover
+                    key={discount.id}
+                    selected={isDiscountselected}
+                  >
+                    <TableCell align="center">
+                      <Typography
+                        variant="body1"
+                        fontWeight="bold"
+                        color="text.primary"
+                        gutterBottom
+                        noWrap
+                      >
+                        {discount.id}
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="center">
+                      <Typography
+                        variant="body1"
+                        fontWeight="bold"
+                        color="text.primary"
+                        gutterBottom
+                        noWrap
+                      >
+                        {discount.name}
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="center">
+                      <Typography
+                        variant="body1"
+                        fontWeight="bold"
+                        color="text.primary"
+                        gutterBottom
+                        noWrap
+                      >
+                        {discount.code}
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="center">
+                      <Typography
+                        variant="body1"
+                        fontWeight="bold"
+                        color="text.primary"
+                        gutterBottom
+                        noWrap
+                      >
+                        {discount.discount}
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="center">
+                      <Typography
+                        variant="body1"
+                        fontWeight="bold"
+                        color="text.primary"
+                        gutterBottom
+                        noWrap
+                      >
+                        {discount.quantity}
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="center">
+                      <Typography
+                        variant="body1"
+                        fontWeight="bold"
+                        color="text.primary"
+                        gutterBottom
+                        noWrap
+                      >
+                        {format(new Date(discount.startAt), 'MMMM dd yyyy')}
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="center">
+                      <Typography
+                        variant="body1"
+                        fontWeight="bold"
+                        color="text.primary"
+                        gutterBottom
+                        noWrap
+                      >
+                        {format(new Date(discount.endAt), 'MMMM dd yyyy')}
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="center">
+                      <Link to={`/management/discount/edit/${discount.id}`}>
+                        <Tooltip title="Sửa mã giảm giá" arrow>
+                          <IconButton
+                            sx={{
+                              '&:hover': {
+                                background: theme.colors.primary.lighter
+                              },
+                              color: theme.palette.primary.main
+                            }}
+                            color="inherit"
+                            size="small"
+                          >
+                            <EditTwoToneIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      </Link>
+                      <Tooltip title="Xóa mã giảm giá" arrow>
+                        <IconButton
                           sx={{
                             '&:hover': {
-                              background: theme.colors.primary.lighter
+                              background: theme.colors.error.lighter
                             },
-                            color: theme.palette.primary.main
+                            color: theme.palette.error.main
                           }}
                           color="inherit"
                           size="small"
-                      >
-                        <EditTwoToneIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip> : <></>}
-                    <Tooltip title="Delete Order" arrow>
-                      <IconButton
-                        sx={{
-                          '&:hover': { background: theme.colors.error.lighter },
-                          color: theme.palette.error.main
-                        }}
-                        color="inherit"
-                        size="small"
-                      >
-                        <DeleteTwoToneIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
+                        >
+                          <DeleteTwoToneIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    </TableCell>
+                  </TableRow>
+                );
+              })
+            ) : (
+              <></>
+            )}
           </TableBody>
         </Table>
       </TableContainer>
@@ -305,8 +259,8 @@ const ListDiscountsTable = ({ cryptoOrders }) => {
           count={1}
           onPageChange={handlePageChange}
           onRowsPerPageChange={handleLimitChange}
-          page={page}
-          rowsPerPage={limit}
+          page={data.metadate.pageNumber ?? 10}
+          rowsPerPage={data.metadate.pageSize ?? 1}
           rowsPerPageOptions={[5, 10, 25, 30]}
         />
       </Box>
@@ -315,11 +269,11 @@ const ListDiscountsTable = ({ cryptoOrders }) => {
 };
 
 ListDiscountsTable.propTypes = {
-  cryptoOrders: PropTypes.array.isRequired
+  Discounts: PropTypes.array.isRequired
 };
 
 ListDiscountsTable.defaultProps = {
-  cryptoOrders: []
+  Discounts: []
 };
 
 export default ListDiscountsTable;

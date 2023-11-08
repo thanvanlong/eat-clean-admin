@@ -1,78 +1,83 @@
-import userApi from 'src/api/userApi';
+import { IDiscounts } from 'src/interfaces/discounts.interface';
 import authApi from '../../api/authApi';
 import { toastOption } from '../../configs/notification.config';
 import { LoadingStatus } from '../../enums/enum';
 import { ILoginData, IRegisterData, IUser } from '../../interfaces';
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { toast } from 'react-toastify';
+import discountsApi from 'src/api/discountsApi';
 
-export const requestLogin = createAsyncThunk(
-  'auth/login',
-  async (input: ILoginData, thunkAPI) => {
-    const response = await authApi.login(input);
-    console.log(response);
-    if (!response.success)
-      throw { message: response.message, errorCode: response.errorCode };
-    return response.data;
-  }
-);
-
-export const requestRegister = createAsyncThunk(
-  'auth/register',
-  async (input: IRegisterData, thunkAPI) => {
-    const response = await authApi.register(input);
-    if (!response.success)
-      throw { message: response.message, errorCode: response.errorCode };
-    return response.data;
-  }
-);
-
-export const listUser = createAsyncThunk(
-  'user/list',
+export const getAllDiscounts = createAsyncThunk(
+  'discounts/getAll',
   async (input: Query, thunkAPI) => {
-    const response = await userApi.get(input);
+    const response = await discountsApi.get(input);
     if (!response.success)
       throw { message: response.message, errorCode: response.errorCode };
     return response.data;
   }
 );
 
-export interface AuthState {
-  currentUser: IUser | null | undefined;
-  users: IUser[];
+export const getOneDiscounts = createAsyncThunk(
+  'discounts/getOne',
+  async (input: number, thunkAPI) => {
+    const response = await discountsApi.getOne(input);
+    if (!response.success)
+      throw { message: response.message, errorCode: response.errorCode };
+    return response.data;
+  }
+);
+
+export const create = createAsyncThunk(
+  'discounts/create',
+  async (input: IDiscounts, thunkAPI) => {
+    const response = await discountsApi.create(input);
+    if (!response.success)
+      throw { message: response.message, errorCode: response.errorCode };
+    return response.data;
+  }
+);
+
+export const update = createAsyncThunk(
+  'discounts/update',
+  async (input: IDiscounts, thunkAPI) => {
+    const { id, ...rest } = input;
+    const response = await discountsApi.update(id, rest);
+    if (!response.success)
+      throw { message: response.message, errorCode: response.errorCode };
+    return response.data;
+  }
+);
+
+export interface DiscountsState {
+  discounts: IDiscounts[];
   metadate: IMetadata;
-  accessToken: string | undefined;
   error: ErrorResponse | null;
   loading: LoadingStatus;
 }
 
-const initialState: AuthState = {
-  currentUser: null,
-  users: [],
+const initialState: DiscountsState = {
+  discounts: [],
   metadate: {},
-  accessToken: '',
   error: null,
   loading: LoadingStatus.Pending
 };
 
-const authSlice = createSlice({
-  name: 'auth',
+const discountsSlide = createSlice({
+  name: 'discounts',
   initialState,
   reducers: {},
   extraReducers(builder) {
     builder
-      .addCase(requestLogin.fulfilled, (state, action) => {
+      .addCase(getAllDiscounts.fulfilled, (state, action) => {
         if (action.payload == null) return;
-      })
-      .addCase(listUser.fulfilled, (state, action) => {
-        if (action.payload == null) return;
-        state.users = action.payload.results;
+        state.discounts = action.payload.results;
         state.metadate = action.payload.metadata;
+        state.loading = LoadingStatus.Fulfilled;
       })
       .addMatcher(
         (action) => action.type.includes('rejected'),
         (state, action) => {
-          console.log(action);
+          console.log(action.type);
 
           state.error = {
             message: action.payload?.message ?? action.error.message,
@@ -95,4 +100,4 @@ const authSlice = createSlice({
       });
   }
 });
-export default authSlice.reducer;
+export default discountsSlide.reducer;

@@ -11,10 +11,10 @@ function PageHeader() {
     <Grid container justifyContent="space-between" alignItems="center">
       <Grid item>
         <Typography variant="h3" component="h3" gutterBottom>
-          Users
+          Khách hàng
         </Typography>
         <Typography variant="subtitle2">
-          {user.name}, these are list customers
+          {user.name}, Đây là màn quản lý khách hàng
         </Typography>
       </Grid>
     </Grid>

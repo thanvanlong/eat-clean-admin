@@ -28,42 +28,43 @@ const ManageOrder = Loader(
   lazy(() => import('src/content/pages/Main/Management/Transactions/index'))
 );
 const ManageProduct = Loader(
-    lazy(() => import('src/content/pages/Main/Management/Products/index'))
+  lazy(() => import('src/content/pages/Main/Management/Products/index'))
 );
 
 const ManageProductDetail = Loader(
-    lazy(() => import('src/content/pages/Main/Management/Products/Details/index'))
-)
-
+  lazy(() => import('src/content/pages/Main/Management/Products/Details/index'))
+);
 
 const ManageProductEdit = Loader(
-    lazy(() => import('src/content/pages/Main/Management/Products/Edit/index'))
-)
+  lazy(() => import('src/content/pages/Main/Management/Products/Edit/index'))
+);
 
 const ManageBlogEdit = Loader(
     lazy(() => import('src/content/pages/Main/Management/Blogs/BlogEdit/index'))
 )
 
 const ManageUser = Loader(
-    lazy(() => import('src/content/pages/Main/Management/Users/index'))
-)
+  lazy(() => import('src/content/pages/Main/Management/Users/index'))
+);
 
 const ManageBlog = Loader(
-    lazy(() => import('src/content/pages/Main/Management/Blogs/index'))
-)
+  lazy(() => import('src/content/pages/Main/Management/Blogs/index'))
+);
 
 const ManageBlogDetail = Loader(
-    lazy(() => import('src/content/pages/Main/Management/Blogs/BlogDetail/index'))
-)
+  lazy(() => import('src/content/pages/Main/Management/Blogs/BlogDetail/index'))
+);
 
 const ManageDiscount = Loader(
-    lazy(() => import('src/content/pages/Main/Management/Discounts/index'))
-)
+  lazy(() => import('src/content/pages/Main/Management/Discounts/index'))
+);
 
 const ManageDiscountDetail = Loader(
-    lazy(() => import('src/content/pages/Main/Management/Discounts/DiscountDetail/index'))
-)
-
+  lazy(
+    () =>
+      import('src/content/pages/Main/Management/Discounts/DiscountDetail/index')
+  )
+);
 
 const Login = Loader(
   lazy(() => import('src/content/pages/Main/Account/Login'))
@@ -153,6 +154,10 @@ const routes: RouteObject[] = [
       },
       {
         path: 'discount/create',
+        element: getElement(<ManageDiscountDetail />)
+      },
+      {
+        path: 'discount/edit/:id',
         element: getElement(<ManageDiscountDetail />)
       }
     ]
