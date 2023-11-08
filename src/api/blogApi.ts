@@ -2,10 +2,10 @@
 import Api from './api';
 import {IBlog, ICategory, IProduct} from '../interfaces/product.interface';
 
-class ProductApi {
+class BlogApi {
   private baseUrl: string;
   constructor() {
-    this.baseUrl = '/products';
+    this.baseUrl = '/blog';
   }
 
   async get(_param: Query): Promise<ApiListResponse<IProduct>> {
@@ -22,21 +22,28 @@ class ProductApi {
     return Api.GET(this.baseUrl + `/category` );
   }
 
-  async createProduct(body: FormData): Promise<ApiResponse<boolean>> {
-    return Api.POST(this.baseUrl + `/create-product`, body);
+  async createBlog(body: FormData): Promise<ApiResponse<boolean>> {
+    return Api.POST(this.baseUrl + `/create`, body);
   }
 
-  async updateProduct(body: FormData): Promise<ApiResponse<boolean>> {
-    return Api.PUT(this.baseUrl + `/update-product`, body);
+  async updateBlog(body: FormData): Promise<ApiResponse<boolean>> {
+    return Api.PUT(this.baseUrl + `/update`, body);
   }
 
   async getOne(
       _param: number,
-  ): Promise<ApiResponse<IProduct>> {
+  ): Promise<ApiResponse<IBlog>> {
     return Api.GET(this.baseUrl + `/${_param}`);
+  }
+
+
+  async deleteOne(
+      _param: number,
+  ): Promise<ApiResponse<any>> {
+    return Api.DELETE(this.baseUrl + `/${_param}`);
   }
 }
 
 
 
-export default new ProductApi();
+export default new BlogApi();

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, {useState, useRef, useEffect, useMemo} from 'react';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import Editor from "./Editor";
@@ -13,9 +13,16 @@ import ImgCrop from "antd-img-crop";
 import {UploadFile} from "antd/es/upload/interface";
 import {RcFile} from "antd/es/upload";
 import TextArea from "antd/es/input/TextArea";
-import {createBlog, createProduct} from "../../../../../../redux/features/productSlice";
-import {useAppDispatch} from "../../../../../../redux/hooks";
-import {useNavigate} from "react-router";
+import {
+    createBlog,
+    createProduct,
+    deleteBlog,
+    getBlogById,
+    updateBlog
+} from "../../../../../../redux/features/productSlice";
+import {useAppDispatch, useAppSelector} from "../../../../../../redux/hooks";
+import {useLocation, useNavigate} from "react-router";
+import {RootState} from "../../../../../../redux/store";
 
 function BlogDetail() {
     const [previewOpen, setPreviewOpen] = useState(false);
@@ -26,10 +33,26 @@ function BlogDetail() {
     const [open, setOpen] = useState(false);
     const handleCancel = () => setPreviewOpen(false);
     const navigate = useNavigate()
+    const location = useLocation()
 
     const handle = (e) => {
         setContent(e)
     }
+    const id = location.pathname.substring(location.pathname.lastIndexOf('/') + 1)
+
+
+    const blog = useAppSelector((root: RootState) => root.product.blog)
+
+    const initialValues: any = useMemo(() => {
+        const imgs = {uid: "1", name: "Thumbnail", status: 'done', url: blog?.imgThumbnail} as UploadFile
+        setFileList(imgs ? [imgs] : [])
+        setContent(blog?.content)
+        return {
+            title: blog?.title ?? "sss",
+            description: blog?.description ?? "",
+            content: blog?.content ?? "",
+        };
+    }, [blog]);
 
     const handlePreview = async (file: UploadFile) => {
         if (!file.url && !file.preview) {
@@ -40,6 +63,12 @@ function BlogDetail() {
         setPreviewOpen(true);
         setPreviewTitle(file.name || file.url!.substring(file.url!.lastIndexOf('/') + 1));
     };
+
+    const handleDelete = () => {
+        dispatch(deleteBlog(Number(id))).then(() => {
+            navigate("/management/blog")
+        })
+    }
 
     const handleChange: UploadProps['onChange'] = ({ fileList: newFileList }) => {
         setFileList(newFileList);
@@ -76,14 +105,17 @@ function BlogDetail() {
             }
         }
         formData.append("content", content)
-        console.log(e)
-        console.log(content)
+        formData.append("id", id)
         setOpen(true)
-        dispatch(createBlog(formData)).then(() => {
+        dispatch(updateBlog(formData)).then(() => {
             setOpen(false)
             navigate("/management/blog")
         })
     }
+
+    useEffect(() => {
+        dispatch(getBlogById(Number(id)))
+    }, []);
 
     return (
         <div>
@@ -93,7 +125,7 @@ function BlogDetail() {
             </PageTitleWrapper>
 
             <Card sx={{padding: 2}}>
-                <Form onFinish={handleSubmit}>
+                {blog ? <Form initialValues={initialValues} onFinish={handleSubmit}>
                     <div className={'w-full'}>
                         <Typography fontWeight={'bold'}>Post Title</Typography>
                         <Form.Item
@@ -116,7 +148,7 @@ function BlogDetail() {
                         <p className={'font-semibold text-gray-700 mb-1'}>Image</p>
                         <Form.Item
                             name="file"
-                            rules={[{ required: true, message: 'Please input image!' }]}
+                            rules={[{ required: false, message: 'Please input image!' }]}
                         >
                             <Upload
                                 action="https://run.mocky.io/v3/435e224c-44fb-4773-9faf-380c5e6a2188"
@@ -141,14 +173,17 @@ function BlogDetail() {
                     </div>
                     <div>
                         <Typography fontWeight={'bold'} sx={{mb: 1}}>Blogs</Typography>
-                        <Editor handle={(e) => handle(e)}/>
+                        <Editor handle={(e) => handle(e)} data={initialValues?.content} />
                     </div>
                     <div className={'w-full flex justify-center'}>
+                        <Button className={'mr-5'} danger={true} onClick={handleDelete}>
+                            Delete
+                        </Button>
                         <Button type="primary" htmlType="submit">
                             Submit
                         </Button>
                     </div>
-                </Form>
+                </Form> : <></>}
             </Card>
             <Backdrop open={open}>
                 <CircularProgress />

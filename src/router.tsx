@@ -40,6 +40,10 @@ const ManageProductEdit = Loader(
     lazy(() => import('src/content/pages/Main/Management/Products/Edit/index'))
 )
 
+const ManageBlogEdit = Loader(
+    lazy(() => import('src/content/pages/Main/Management/Blogs/BlogEdit/index'))
+)
+
 const ManageUser = Loader(
     lazy(() => import('src/content/pages/Main/Management/Users/index'))
 )
@@ -134,6 +138,10 @@ const routes: RouteObject[] = [
       {
         path: 'blog',
         element: getElement(<ManageBlog />)
+      },
+      {
+        path: 'blog/:id',
+        element: getElement(<ManageBlogEdit />)
       },
       {
         path: 'blog/create',

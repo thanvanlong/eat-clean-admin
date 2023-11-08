@@ -1,7 +1,7 @@
 import { Helmet } from 'react-helmet-async';
 import PageHeader from './PageHeader';
 import PageTitleWrapper from 'src/components/PageTitleWrapper';
-import {Container, Card, CardContent, Typography, Backdrop} from '@mui/material';
+import {Container, Card, CardContent, Typography, Backdrop, IconButton} from '@mui/material';
 import Footer from 'src/components/Footer';
 import React, {useEffect, useMemo, useState} from 'react';
 import {Input, Modal, Upload, InputNumber, Button, Form, DatePicker, message} from 'antd';
@@ -11,13 +11,13 @@ import TextArea from "antd/es/input/TextArea";
 import { Select, Space } from 'antd';
 import type { SelectProps } from 'antd';
 import {useAppDispatch, useAppSelector} from "../../../../../../redux/hooks";
-import {createProduct, getCategory, getProductById} from "../../../../../../redux/features/productSlice";
+import {createProduct, getCategory, getProductById, updateProduct} from "../../../../../../redux/features/productSlice";
 import {RootState} from "../../../../../../redux/store";
 import Editor from "../../Blogs/BlogDetail/Editor";
 import 'react-quill/dist/quill.snow.css';
 import { CircularProgress } from "@mui/material";
 import {useLocation, useNavigate} from "react-router";
-import {IProduct} from "../../../../../../interfaces/product.interface";
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 function EditProduct() {
     const [previewOpen, setPreviewOpen] = useState(false);
     const [open, setOpen] = useState(false);
@@ -40,7 +40,7 @@ function EditProduct() {
 
     const handleChange: UploadProps['onChange'] = ({ fileList: newFileList }) => {
         setFileList(newFileList);
-        console.log(newFileList[0])
+        // console.log(newFileList)
     }
 
 
@@ -62,23 +62,31 @@ function EditProduct() {
     const category = useAppSelector((root: RootState) => root.product.categories)
     const product = useAppSelector((root: RootState) => root.product.product)
     let options: SelectProps['options'] = category?.map(it => ({label: it.label, value: it.id}))
-    console.log(product)
     const initialValues: any = useMemo(() => {
+        const imgs =
+            product?.imgs?.map((it, index) =>
+                ({uid: index.toString(), name: index.toString(), status: 'done', url: it} as UploadFile))
+        setFileList(imgs ? imgs : [])
         return {
             name: product?.name ?? "sss",
             price: product?.price ?? 0,
             description: product?.description ?? "<p>long van than</p>",
             slug: product?.slug ?? "",
-            categories: product?.categories?.[0].key ?? "",
-            imgs: product?.imgs ?? [],
+            categories: product?.categories?.[0].id ?? "",
+            img: product?.imgs ?? [],
             quantity: product?.quantity ?? 0,
+            fileList: fileList ? fileList : [],
             shortDescription: product?.shortDescription ?? "",
         };
     }, [product]);
 
+    console.log(initialValues?.description)
+
     useEffect(() => {
         getCategories()
-        dispatch(getProductById(Number(id)))
+        dispatch(getProductById(Number(id))).then((item) => {
+
+        })
     }, [])
 
     useEffect(() => {
@@ -87,6 +95,7 @@ function EditProduct() {
     }, [])
 
     const handleSubmit = (e) => {
+        const imgs = fileList.filter(it => it.status == 'done')
         let formData = new FormData();    //formdata object
 
         for (const key of Object.keys(e)) {
@@ -94,14 +103,19 @@ function EditProduct() {
                 formData.append(key, e[key]);
             }
             else {
-                e[key].fileList.forEach((item) => {
+                e[key]?.fileList.forEach((item) => {
                     formData.append(key, item.originFileObj)
                 });
             }
         }
         formData.append("description", description)
+        formData.append("id", id)
+        imgs.map(it => {
+            formData.append("imgs", it.url)
+        })
         setOpen(true)
-        dispatch(createProduct(formData)).then(() => {
+
+        dispatch(updateProduct(formData)).then(() => {
             setOpen(false)
             navigate("/management/product")
         })
@@ -164,9 +178,6 @@ function EditProduct() {
                                 <Modal open={previewOpen} title={previewTitle} footer={null} onCancel={handleCancel}>
                                     <img alt="example" style={{ width: '100%' }} src={previewImage} />
                                 </Modal>
-                                <div className={'border-red-700'}>
-                                    <img src={"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS1BG9bXE8Gzv0ViwAlny9vGx4538zhgG17JeJECXAdgQ&s"} />
-                                </div>
                             </div>
                             <div className={'w-full mt-3'}>
                                 <Typography fontWeight={'bold'}>Slug</Typography>
@@ -216,7 +227,8 @@ function EditProduct() {
                             </div>
                             <div className={'w-full mt-3'}>
                                 <Typography fontWeight={'bold'} sx={{mb: 1}}>Blogs</Typography>
-                                <Editor handle={(e) => handle(e)} data={initialValues.description} />
+                                {initialValues.description ? <Editor handle={(e) => handle(e)} data={initialValues.description} /> : <Editor handle={(e) => handle(e)} />}
+
                             </div>
                             <div className={'w-full flex justify-center mt-9'}>
                                 <Button type="primary" htmlType="submit">
