@@ -15,6 +15,7 @@ import {
   message
 } from 'antd';
 import dayjs from 'dayjs';
+import moment, { Moment } from 'moment';
 
 import TextArea from 'antd/es/input/TextArea';
 import { Select, Space } from 'antd';
@@ -26,6 +27,7 @@ import { toastOption } from 'src/configs/notification.config';
 import { IDiscounts } from 'src/interfaces/discounts.interface';
 import discountsApi from 'src/api/discountsApi';
 import { create, update } from 'src/redux/features/discountSlice';
+import { useForm } from 'antd/es/form/Form';
 
 function DiscountDetail() {
   const [componentDisabled, setComponentDisabled] = useState<boolean>(false);
@@ -38,6 +40,8 @@ function DiscountDetail() {
 
   let { id } = useParams();
 
+  const [form] = Form.useForm();
+
   useEffect(() => {
     if (id) {
       if (Number(id)) {
@@ -46,6 +50,7 @@ function DiscountDetail() {
         fetchData(Number(id));
       } else navigate('/404');
     } else {
+      setIsHide(false);
       setError(null);
     }
   }, [id]);
@@ -110,21 +115,29 @@ function DiscountDetail() {
         <title>Thêm mới mã giảm giá</title>
       </Helmet>
       <PageTitleWrapper>
-        <PageHeader title="Mã giảm giá" />
+        <PageHeader
+          title={title == 'Thêm nội dung' ? 'Mã giảm giá' : 'Sửa mã giảm giá'}
+          desc={title == 'Thêm nội dung' ? '' : 'Sửa nội dung của mã giảm giá'}
+        />
       </PageTitleWrapper>
       <Container maxWidth="lg">
         <Card style={{ background: 'white' }}>
           <CardContent>
             {!isHide ? (
               <Form
+                form={form}
                 layout="vertical"
                 onFinish={onFinish}
                 disabled={componentDisabled}
-                initialValues={{
-                  ...discounts,
-                  startAt: dayjs('2015-06-06', dateFormat),
-                  endAt: dayjs('2015-06-06', dateFormat)
-                }}
+                initialValues={
+                  Boolean(discounts)
+                    ? {
+                        ...discounts,
+                        startAt: dayjs(discounts?.startAt, dateFormat),
+                        endAt: dayjs(discounts.endAt, dateFormat)
+                      }
+                    : { ...discounts }
+                }
               >
                 <div className={'w-full'}>
                   <Form.Item
@@ -203,6 +216,10 @@ function DiscountDetail() {
                       ]}
                     >
                       <DatePicker
+                        disabledDate={(d) =>
+                          d <= moment().subtract(1, 'days') ||
+                          d >= form.getFieldValue('endAt')
+                        }
                         onChange={() => {}}
                         className={'p-1 mt-1 w-full'}
                       />
@@ -220,6 +237,10 @@ function DiscountDetail() {
                       ]}
                     >
                       <DatePicker
+                        disabledDate={(d) =>
+                          d <= moment().subtract(1, 'days') ||
+                          d <= form.getFieldValue('startAt')
+                        }
                         onChange={() => {}}
                         className={'p-1 mt-1 w-full'}
                       />

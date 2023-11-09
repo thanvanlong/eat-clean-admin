@@ -15,7 +15,7 @@ function PageHeader({ title, desc }: Props) {
           {title}
         </Typography>
         <Typography variant="subtitle2">
-          {desc ?? 'Tạo mới mã giảm giá'}
+          {desc || 'Tạo mới mã giảm giá'}
         </Typography>
       </Grid>
     </Grid>
