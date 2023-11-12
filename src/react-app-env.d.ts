@@ -16,6 +16,7 @@ interface ApiListResponse<T> {
       pageNumber: number;
       pageSize: number;
       totalPages: number;
+      totalItems: number;
       currentPage?: number;
     };
   };
@@ -26,6 +27,7 @@ interface IMetadata {
   pageSize?: number;
   totalPages?: number;
   currentPage?: number;
+  totalItems?: number;
 }
 
 interface ErrorResponse {

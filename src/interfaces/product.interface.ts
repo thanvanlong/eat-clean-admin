@@ -44,4 +44,5 @@ export interface IBill {
   note: string;
   price: number;
   billStatus: string;
+  username: string;
 }

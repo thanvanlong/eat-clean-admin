@@ -47,14 +47,15 @@ const ListProductsTable = () => {
   );
   const selectedBulkActions = selectedProduct.length > 0;
   const [page, setPage] = useState<number>(0);
-  const [limit, setLimit] = useState<number>(5);
+  const [limit, setLimit] = useState<number>(10);
 
 
   useEffect(() => {
-    dispatch(getProductByPage({page: 0, limit: 30}))
+    dispatch(getProductByPage({page: 0, limit: 10}))
   }, [])
 
   const products = useAppSelector((root: RootState) => root.product.products)
+  const metadata = useAppSelector((root: RootState) => root.product.metadata)
   const handleSelectAllCryptoOrders = (
       event: ChangeEvent<HTMLInputElement>
   ): void => {
@@ -83,11 +84,12 @@ const ListProductsTable = () => {
 
   const handlePageChange = (event: any, newPage: number): void => {
     setPage(newPage);
+    dispatch(getProductByPage({page: newPage, limit: 10}))
   };
 
   const handleDelete = (id) => {
     dispatch(deleteProduct(id)).then(() => {
-      dispatch(getProductByPage({page: 0, limit: 30}))
+      dispatch(getProductByPage({page: 0, limit: 10}))
     })
   }
 
@@ -96,9 +98,6 @@ const ListProductsTable = () => {
   };
   const theme = useTheme();
   const dispatch = useAppDispatch();
-  const applyPagination = (): IProduct[] => {
-    return products.slice(page * limit, page * limit + limit);
-  };
 
 
   return (
@@ -123,12 +122,6 @@ const ListProductsTable = () => {
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell padding="checkbox">
-                <Checkbox
-                  color="primary"
-                  onChange={handleSelectAllCryptoOrders}
-                />
-              </TableCell>
               <TableCell>ID</TableCell>
               <TableCell>Ảnh</TableCell>
               <TableCell>Tên sản phẩm</TableCell>
@@ -139,26 +132,12 @@ const ListProductsTable = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {products ? applyPagination().map((it) => {
-              const isSelected = selectedProduct.includes(
-                it.id
-              );
+            {products ? products.map((it) => {
               return (
                 <TableRow
                   hover
                   key={it.id}
-                  selected={isSelected}
                 >
-                  <TableCell padding="checkbox">
-                    <Checkbox
-                      color="primary"
-                      checked={isSelected}
-                      onChange={(event: ChangeEvent<HTMLInputElement>) =>
-                        handleSelectOneCryptoOrder(event, it.id)
-                      }
-                      value={isSelected}
-                    />
-                  </TableCell>
                   <TableCell>
                     <Typography
                       variant="body1"
@@ -246,12 +225,11 @@ const ListProductsTable = () => {
       <Box p={2}>
         <TablePagination
           component="div"
-          count={products ? products.length : limit}
+          count={metadata ? metadata.totalItems : 0}
           onPageChange={handlePageChange}
-          onRowsPerPageChange={handleLimitChange}
           page={page}
-          rowsPerPage={limit}
-          rowsPerPageOptions={[5, 10, 25, 30]}
+          rowsPerPage={10}
+          rowsPerPageOptions={[10]}
         />
       </Box>
     </Card>

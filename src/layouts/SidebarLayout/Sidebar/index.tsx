@@ -63,7 +63,7 @@ function Sidebar() {
                 alignItems: 'center'
               }}
             >
-              <img src={ZappyLogo} alt="Zappy Logo" style={{ width: '90px' }} />
+              <img src={"/logo.png"} alt="Zappy Logo" style={{ width: '90px' }} />
             </Box>
           </Box>
           <Divider

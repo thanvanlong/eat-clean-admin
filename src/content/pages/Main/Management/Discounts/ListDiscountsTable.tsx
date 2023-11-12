@@ -259,9 +259,9 @@ const ListDiscountsTable = () => {
           count={1}
           onPageChange={handlePageChange}
           onRowsPerPageChange={handleLimitChange}
-          page={data.metadate.pageNumber ?? 10}
-          rowsPerPage={data.metadate.pageSize ?? 1}
-          rowsPerPageOptions={[5, 10, 25, 30]}
+          page={page}
+          rowsPerPage={10}
+          rowsPerPageOptions={[10]}
         />
       </Box>
     </Card>

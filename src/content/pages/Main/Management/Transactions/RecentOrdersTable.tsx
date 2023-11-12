@@ -59,25 +59,9 @@ const ListOrdersTable = () => {
 
   };
 
-  const handleSelectOneCryptoOrder = (
-      event: ChangeEvent<HTMLInputElement>,
-      cryptoOrderId: string
-  ): void => {
-    if (!selectedBill.includes(cryptoOrderId)) {
-      setSelectedBill((prevSelected) => [
-        ...prevSelected,
-        cryptoOrderId
-      ]);
-    } else {
-      setSelectedBill((prevSelected) =>
-          prevSelected.filter((id) => id !== cryptoOrderId)
-      );
-    }
-  };
-
 
   const options: SelectProps['options'] = [{label: "PENDING", value: "PENDING"},
-    {label: "CANCEL", value: "CANCEL"}, {label: "COMPLETED", value: "COMPLETED"}, {label: "FAIL", value: "FAIL"}];
+    {label: "CANCEL", value: "CANCEL"}, {label: "COMPLETED", value: "COMPLETED"}];
 
   const handlePageChange = (event: any, newPage: number): void => {
     setPage(newPage);
@@ -89,7 +73,7 @@ const ListOrdersTable = () => {
   const theme = useTheme();
   const dispatch = useAppDispatch();
   const applyPagination = (): IBill[] => {
-    return bills;
+    return bills.slice(0, limit);
   };
 
   const handleSubmit = (e) => {
@@ -175,7 +159,7 @@ const ListOrdersTable = () => {
                             gutterBottom
                             noWrap
                         >
-                          {it.user.name}
+                          {it.username}
                         </Typography>
                       </TableCell>
                       <TableCell>
@@ -186,7 +170,7 @@ const ListOrdersTable = () => {
                             gutterBottom
                             noWrap
                         >
-                          {it.user.phone}
+                          {it.phone}
                         </Typography>
                       </TableCell>
                       <TableCell align="right">
@@ -250,8 +234,8 @@ const ListOrdersTable = () => {
               onPageChange={handlePageChange}
               onRowsPerPageChange={handleLimitChange}
               page={page}
-              rowsPerPage={limit}
-              rowsPerPageOptions={[5, 10, 25, 30]}
+              rowsPerPage={10}
+              rowsPerPageOptions={[10]}
           />
         </Box>
 
