@@ -8,9 +8,10 @@ import BaseLayout from 'src/layouts/BaseLayout';
 import SuspenseLoader from 'src/components/SuspenseLoader';
 
 const login = localStorage.getItem('token');
+console.log(login, '--------')
 
 const getElement = (element: any) => {
-  return true ? element : <Navigate to="/" replace />;
+  return login ? element : <Navigate to="/login" replace />;
 };
 
 const Loader = (Component) => (props) =>

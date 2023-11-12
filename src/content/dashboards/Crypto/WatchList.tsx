@@ -21,7 +21,7 @@ const EmptyResultsWrapper = styled('img')(
 `
 );
 
-function WatchList() {
+function WatchList(props: any) {
   const [tabs, setTab] = useState<string | null>('watch_list_columns');
 
   const handleViewOrientation = (
@@ -42,56 +42,8 @@ function WatchList() {
         }}
       >
         <Typography variant="h3">Watch List</Typography>
-        <ToggleButtonGroup
-          value={tabs}
-          exclusive
-          onChange={handleViewOrientation}
-        >
-          <ToggleButton disableRipple value="watch_list_columns">
-            <ViewWeekTwoToneIcon />
-          </ToggleButton>
-          <ToggleButton disableRipple value="watch_list_rows">
-            <TableRowsTwoToneIcon />
-          </ToggleButton>
-        </ToggleButtonGroup>
       </Box>
-
-      {tabs === 'watch_list_columns' && <WatchListColumn />}
-
-      {tabs === 'watch_list_rows' && <WatchListRow />}
-
-      {!tabs && (
-        <Card
-          sx={{
-            textAlign: 'center',
-            p: 3
-          }}
-        >
-          <EmptyResultsWrapper src="/static/images/placeholders/illustrations/1.svg" />
-
-          <Typography
-            align="center"
-            variant="h2"
-            fontWeight="normal"
-            color="text.secondary"
-            sx={{
-              mt: 3
-            }}
-            gutterBottom
-          >
-            Click something, anything!
-          </Typography>
-          <Button
-            variant="contained"
-            size="large"
-            sx={{
-              mt: 4
-            }}
-          >
-            Maybe, a button?
-          </Button>
-        </Card>
-      )}
+      <WatchListColumn monthRevenue={props?.monthRevenue} totalRevenue={props?.totalRevenue} daysRevenue={props?.daysRevenue} />
     </>
   );
 }

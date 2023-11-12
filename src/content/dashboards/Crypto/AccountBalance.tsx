@@ -1,5 +1,4 @@
 import {
-  Button,
   Card,
   Box,
   Grid,
@@ -18,6 +17,12 @@ import TrendingUp from '@mui/icons-material/TrendingUp';
 import Text from 'src/components/Text';
 import Chart from 'react-apexcharts';
 import type { ApexOptions } from 'apexcharts';
+import {useAppDispatch, useAppSelector} from "../../../redux/hooks";
+import React, {useEffect, useState} from "react";
+import {getTotalRevenue} from "../../../redux/features/productSlice";
+import {RootState} from "../../../redux/store";
+import {Button, DatePicker, Form, Modal} from "antd";
+import statsApi from "../../../api/statsApi";
 
 const AvatarSuccess = styled(Avatar)(
   ({ theme }) => `
@@ -55,8 +60,20 @@ const ListItemAvatarWrapper = styled(ListItemAvatar)(
 `
 );
 
-function AccountBalance() {
+function AccountBalance(props: any) {
   const theme = useTheme();
+  const [open, setOpen] = useState(false)
+  function getRandomColor() {
+    const letters = '0123456789ABCDEF';
+    let color = '#';
+    for (let i = 0; i < 6; i++) {
+      color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+  }
+
+  const { RangePicker } = DatePicker;
+
 
   const chartOptions: ApexOptions = {
     chart: {
@@ -73,7 +90,7 @@ function AccountBalance() {
         }
       }
     },
-    colors: ['#ff9900', '#1c81c2', '#333', '#5c6ac0'],
+    colors: props?.categoryRevenue ? props?.categoryRevenue?.map(() => getRandomColor()) : [],
     dataLabels: {
       enabled: true,
       formatter: function (val) {
@@ -110,7 +127,7 @@ function AccountBalance() {
     fill: {
       opacity: 1
     },
-    labels: ['Bitcoin', 'Ripple', 'Cardano', 'Ethereum'],
+    labels: props?.categoryRevenue ? props?.categoryRevenue?.map((it) => it?.label) : [],
     legend: {
       labels: {
         colors: theme.colors.alpha.trueWhite[100]
@@ -125,7 +142,7 @@ function AccountBalance() {
     }
   };
 
-  const chartSeries = [10, 20, 25, 45];
+  const chartSeries = props?.categoryRevenue ? props?.categoryRevenue?.map((it) => it?.revenue) : [];
 
   return (
     <Card>
@@ -138,11 +155,11 @@ function AccountBalance() {
               }}
               variant="h4"
             >
-              Account Balance
+              Total Revenue
             </Typography>
             <Box>
               <Typography variant="h1" gutterBottom>
-                $54,584.23
+                {props?.totalRevenue.toLocaleString('vi-Vi', { style: 'currency', currency: 'VND' })}
               </Typography>
               <Box
                 display="flex"
@@ -160,7 +177,7 @@ function AccountBalance() {
                   <TrendingUp fontSize="large" />
                 </AvatarSuccess>
                 <Box>
-                  <Typography variant="h4">+ $3,594.00</Typography>
+                  <Typography variant="h4">+ {props?.monthRevenue?.toLocaleString('vi-Vi', { style: 'currency', currency: 'VND' })}</Typography>
                   <Typography variant="subtitle2" noWrap>
                     this month
                   </Typography>
@@ -169,12 +186,12 @@ function AccountBalance() {
             </Box>
             <Grid container spacing={3}>
               <Grid sm item>
-                <Button fullWidth variant="outlined">
+                <Button >
                   View Statistics
                 </Button>
               </Grid>
               <Grid sm item>
-                <Button fullWidth variant="contained">
+                <Button onClick={() => setOpen(true)}>
                   Create Report
                 </Button>
               </Grid>
@@ -220,107 +237,64 @@ function AccountBalance() {
                 <List
                   disablePadding
                   sx={{
-                    width: '100%'
+                    width: '100%',
+                    overflow: 'auto',
+                    marginLeft: 6
                   }}
                 >
-                  <ListItem disableGutters>
-                    <ListItemAvatarWrapper>
-                      <img
-                        alt="BTC"
-                        src="/static/images/placeholders/logo/bitcoin.png"
-                      />
-                    </ListItemAvatarWrapper>
-                    <ListItemText
-                      primary="BTC"
-                      primaryTypographyProps={{ variant: 'h5', noWrap: true }}
-                      secondary="Bitcoin"
-                      secondaryTypographyProps={{
-                        variant: 'subtitle2',
-                        noWrap: true
-                      }}
-                    />
-                    <Box>
-                      <Typography align="right" variant="h4" noWrap>
-                        20%
-                      </Typography>
-                      <Text color="success">+2.54%</Text>
-                    </Box>
-                  </ListItem>
-                  <ListItem disableGutters>
-                    <ListItemAvatarWrapper>
-                      <img
-                        alt="XRP"
-                        src="/static/images/placeholders/logo/ripple.png"
-                      />
-                    </ListItemAvatarWrapper>
-                    <ListItemText
-                      primary="XRP"
-                      primaryTypographyProps={{ variant: 'h5', noWrap: true }}
-                      secondary="Ripple"
-                      secondaryTypographyProps={{
-                        variant: 'subtitle2',
-                        noWrap: true
-                      }}
-                    />
-                    <Box>
-                      <Typography align="right" variant="h4" noWrap>
-                        10%
-                      </Typography>
-                      <Text color="error">-1.22%</Text>
-                    </Box>
-                  </ListItem>
-                  <ListItem disableGutters>
-                    <ListItemAvatarWrapper>
-                      <img
-                        alt="ADA"
-                        src="/static/images/placeholders/logo/cardano.png"
-                      />
-                    </ListItemAvatarWrapper>
-                    <ListItemText
-                      primary="ADA"
-                      primaryTypographyProps={{ variant: 'h5', noWrap: true }}
-                      secondary="Cardano"
-                      secondaryTypographyProps={{
-                        variant: 'subtitle2',
-                        noWrap: true
-                      }}
-                    />
-                    <Box>
-                      <Typography align="right" variant="h4" noWrap>
-                        40%
-                      </Typography>
-                      <Text color="success">+10.50%</Text>
-                    </Box>
-                  </ListItem>
-                  <ListItem disableGutters>
-                    <ListItemAvatarWrapper>
-                      <img
-                        alt="ETH"
-                        src="/static/images/placeholders/logo/ethereum.png"
-                      />
-                    </ListItemAvatarWrapper>
-                    <ListItemText
-                      primary="ETH"
-                      primaryTypographyProps={{ variant: 'h5', noWrap: true }}
-                      secondary="Ethereum"
-                      secondaryTypographyProps={{
-                        variant: 'subtitle2',
-                        noWrap: true
-                      }}
-                    />
-                    <Box>
-                      <Typography align="right" variant="h4" noWrap>
-                        30%
-                      </Typography>
-                      <Text color="error">-12.38%</Text>
-                    </Box>
-                  </ListItem>
+                  {
+                    props?.categoryRevenue?.map(it => (
+                        <ListItem disableGutters>
+                          <ListItemText
+                              primary={it?.label?.toUpperCase()}
+                              primaryTypographyProps={{ variant: 'h5', noWrap: true }}
+                              secondary="Category"
+                              secondaryTypographyProps={{
+                                variant: 'subtitle2',
+                                noWrap: true
+                              }}
+                          />
+                          <Box>
+                            <Typography align="right" variant="h4" noWrap>
+                              {it?.revenue / props?.totalRevenue * 100} %
+                            </Typography>
+                          </Box>
+                        </ListItem>
+                    ))
+                  }
                 </List>
               </Grid>
             </Grid>
           </Box>
         </Grid>
       </Grid>
+      <Modal
+          open={open}
+          title={"Edit state transaction"}
+          centered={true}
+          onCancel={() => setOpen(false)}
+          footer={(_, { OkBtn, CancelBtn }) => (
+              <>
+                <Button form={'user-form'} type="primary" htmlType="submit">
+                  Submit
+                </Button>
+              </>
+          )}
+      >
+        <Form id={'user-form'} onFinish={async (e) => {
+          setOpen(false)
+          await  statsApi.exportReport(e.range)}} initialValues={{status: status}}>
+          <Form.Item
+              label="Thời gian: "
+              name="range"
+              rules={[
+                { required: true, message: 'Hãy nhập ngày bắt đầu!' }
+              ]}
+          >
+            <RangePicker className={'w-full'} />
+          </Form.Item>
+        </Form>
+      </Modal>
     </Card>
   );
 }

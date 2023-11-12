@@ -1,3 +1,4 @@
+import {IUser} from "./auth.interface";
 
 
 export interface IProduct {
@@ -37,9 +38,10 @@ export interface ICart {
 export interface IBill {
   id: number;
   carts: ICart[];
-  username: string;
+  user: IUser;
   phone: string;
   address: string;
   note: string;
   price: number;
+  billStatus: string;
 }

@@ -53,9 +53,8 @@ class Api {
       baseURL: 'http://localhost:8080/api/v1',
       headers: {
         // ContentType: "application/json",
-        // // ContentType: 'multipart/form-data',
         // Accept: "application/json",
-      }
+      },
     };
   }
 
@@ -70,7 +69,7 @@ class Api {
 
   public async POST<T>(url: string, body: any, params?: any): Promise<T> {
     const api = await this.AXIOS();
-    return api.post(url, body, { params: params });
+    return api.post(url, body, { params: params, responseType: 'blob' });
   }
 
   public async PUT<T>(url: string, body: any, params?: any): Promise<T> {

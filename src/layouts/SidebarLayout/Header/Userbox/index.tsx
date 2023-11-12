@@ -23,6 +23,7 @@ import AccountBoxTwoToneIcon from '@mui/icons-material/AccountBoxTwoTone';
 import LockOpenTwoToneIcon from '@mui/icons-material/LockOpenTwoTone';
 import AccountTreeTwoToneIcon from '@mui/icons-material/AccountTreeTwoTone';
 import {Form, Input, Modal, Select} from "antd";
+import {useNavigate} from "react-router";
 
 const UserBoxButton = styled(Button)(
   ({ theme }) => `
@@ -65,6 +66,8 @@ function HeaderUserbox() {
     avatar: '/static/images/avatars/1.jpg',
     jobtitle: 'Project Manager'
   };
+
+  const navigate = useNavigate()
 
   const ref = useRef<any>(null);
   const [isOpen, setOpen] = useState<boolean>(false);
@@ -116,18 +119,12 @@ function HeaderUserbox() {
           </UserBoxText>
         </MenuUserBox>
         <Divider sx={{ mb: 0 }} />
-        <List sx={{ p: 1 }} component="nav">
-          <ListItem
-            onClick={() => {}}
-            component={Button}
-          >
-            <AccountTreeTwoToneIcon fontSize="small" />
-            <ListItemText primary="Change password" />
-          </ListItem>
-        </List>
         <Divider />
         <Box sx={{ m: 1 }}>
-          <Button color="primary" fullWidth>
+          <Button color="primary"  onClick={() => {
+            localStorage.clear()
+            navigate("/login")
+          }} fullWidth>
             <LockOpenTwoToneIcon sx={{ mr: 1 }} />
             Sign out
           </Button>

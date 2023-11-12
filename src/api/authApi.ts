@@ -25,6 +25,19 @@ class AuthApi {
     );
   }
 
+  async update(data: any): Promise<ApiResponse<any>> {
+    return Api.PUT<ApiResponse<any>>(
+        this.baseUrl + `/update`,
+        data
+    );
+  }
+
+  async deleteOne(
+      _param: number,
+  ): Promise<ApiResponse<any>> {
+    return Api.DELETE(this.baseUrl + `/${_param}`);
+  }
+
   async refreshToken(): Promise<ApiResponse<IToken>> {
     return Api.POST<ApiResponse<IToken>>(this.baseUrl + "/refresh", {});
   }

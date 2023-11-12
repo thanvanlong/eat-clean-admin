@@ -4,6 +4,8 @@ import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import { Button, Form, Input, Modal } from 'antd';
 import { User } from '../../../../../../models/user';
 import { IUser } from 'src/interfaces';
+import {useAppDispatch} from "../../../../../../redux/hooks";
+import {deleteUser, listUser, updateUser} from "../../../../../../redux/features/authSlice";
 
 interface Props {
   user: IUser;
@@ -11,6 +13,31 @@ interface Props {
 
 function UserCard({ user }: Props) {
   const [openModal, setOpenModal] = useState<boolean>(false);
+  console.log(user)
+  const dispatch = useAppDispatch()
+  const handleSubmit = (e) => {
+    dispatch(updateUser(e )).then(() => {
+      setOpenModal(false)
+      dispatch(
+          listUser({
+            page: 0,
+            limit: 100
+          })
+      );
+    })
+  }
+
+  const handleDelete = () => {
+    dispatch(deleteUser(user.email)).then(() => {
+      setOpenModal(false)
+      dispatch(
+          listUser({
+            page: 0,
+            limit: 100
+          })
+      );
+    })
+  }
 
   return (
     <div>
@@ -34,7 +61,7 @@ function UserCard({ user }: Props) {
               'text-xs bg-[#0b850b] p-1 pl-2 pr-2 text-white rounded-xl'
             }
           >
-            User Role
+            {user?.roles.length == 0 ? "User Role" : user?.roles}
           </span>
           <div className={'w-full mt-2 p-1 pl-5 text-xs'}>
             <div className={'mt-1'}>
@@ -64,7 +91,7 @@ function UserCard({ user }: Props) {
         onCancel={() => setOpenModal(false)}
         footer={(_, { OkBtn, CancelBtn }) => (
           <div className={'justify-end'}>
-            <Button danger={true}>Delete</Button>
+            <Button danger={true} onClick={handleDelete}>Delete</Button>
             <Button
               form={`user-form-${user.id}`}
               type="primary"
@@ -77,8 +104,8 @@ function UserCard({ user }: Props) {
       >
         <Form
           id={`user-form-${user.id}`}
-          onFinish={(value: any) => {}}
-          initialValues={user}
+          onFinish={handleSubmit}
+          initialValues={{...user, password: ""}}
         >
           <div className={'w-full'}>
             <Typography fontWeight={'bold'}>Email</Typography>
@@ -91,6 +118,7 @@ function UserCard({ user }: Props) {
               <Input
                 allowClear
                 type={'email'}
+                disabled={true}
                 className={'p-2 mt-1'}
                 placeholder={'Nhập email'}
               />

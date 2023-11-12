@@ -30,10 +30,13 @@ function Login() {
   const handleSubmit = (e) => {
     dispatch(requestLogin(e)).unwrap()
         .then((it) => {
-          if (it.roles.includes("ROLE_ADMIN")) {
-            localStorage.setItem("token", it.accessToken)
-            navigate("/dashboards/overview")
-          }
+          // if (it.roles.includes("ROLE_ADMIN")) {
+          //   localStorage.setItem("token", it.accessToken)
+          //   navigate("/dashboards/overview")
+          // }
+          localStorage.setItem("token", it.accessToken)
+          navigate("/dashboards/overview")
+
         })
   }
 

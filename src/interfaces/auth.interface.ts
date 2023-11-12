@@ -6,6 +6,7 @@ export interface IUser {
   email: string;
   isActive: boolean;
   roles: string[];
+  password: string;
 }
 
 export interface IToken {

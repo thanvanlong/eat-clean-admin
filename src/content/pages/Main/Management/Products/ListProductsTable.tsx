@@ -1,4 +1,4 @@
-import {FC, ChangeEvent, useState, useEffect} from 'react';
+import React, {FC, ChangeEvent, useState, useEffect} from 'react';
 import { format } from 'date-fns';
 import numeral from 'numeral';
 import PropTypes from 'prop-types';
@@ -22,7 +22,7 @@ import {
   MenuItem,
   Typography,
   useTheme,
-  CardHeader
+  CardHeader, CircularProgress
 } from '@mui/material';
 
 import Label from 'src/components/Label';
@@ -32,9 +32,10 @@ import DeleteTwoToneIcon from '@mui/icons-material/DeleteTwoTone';
 import BulkActions from './BulkActions';
 import {useAppDispatch, useAppSelector} from "../../../../../redux/hooks";
 import {RootState} from "../../../../../redux/store";
-import {getProductByPage} from "../../../../../redux/features/productSlice";
+import {deleteProduct, getProductByPage} from "../../../../../redux/features/productSlice";
 import {IProduct} from "../../../../../interfaces/product.interface";
 import {Link} from "react-router-dom";
+import {Popconfirm} from "antd";
 
 
 
@@ -83,6 +84,12 @@ const ListProductsTable = () => {
   const handlePageChange = (event: any, newPage: number): void => {
     setPage(newPage);
   };
+
+  const handleDelete = (id) => {
+    dispatch(deleteProduct(id)).then(() => {
+      dispatch(getProductByPage({page: 0, limit: 100}))
+    })
+  }
 
   const handleLimitChange = (event: ChangeEvent<HTMLInputElement>): void => {
     setLimit(parseInt(event.target.value));
@@ -211,22 +218,28 @@ const ListProductsTable = () => {
                         </IconButton>
                       </Tooltip>
                     </Link>
-                    <Tooltip title="Delete Order" arrow>
+                    <Popconfirm
+                        title="Delete the task"
+                        description="Are you sure to delete this task?"
+                        onConfirm={() => handleDelete(it.id)}
+                        okText="Yes"
+                        cancelText="No"
+                    >
                       <IconButton
-                        sx={{
-                          '&:hover': { background: theme.colors.error.lighter },
-                          color: theme.palette.error.main
-                        }}
-                        color="inherit"
-                        size="small"
+                          sx={{
+                            '&:hover': { background: theme.colors.error.lighter },
+                            color: theme.palette.error.main
+                          }}
+                          color="inherit"
+                          size="small"
                       >
                         <DeleteTwoToneIcon fontSize="small" />
                       </IconButton>
-                    </Tooltip>
+                    </Popconfirm>
                   </TableCell>
                 </TableRow>
               );
-            }) : <></>}
+            }) : <TableRow><TableCell><CircularProgress /></TableCell></TableRow>}
           </TableBody>
         </Table>
       </TableContainer>

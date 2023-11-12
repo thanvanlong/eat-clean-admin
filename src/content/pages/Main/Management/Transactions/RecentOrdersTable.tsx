@@ -1,6 +1,4 @@
-import { FC, ChangeEvent, useState } from 'react';
-import { format } from 'date-fns';
-import numeral from 'numeral';
+import React, {FC, ChangeEvent, useState, useEffect} from 'react';
 import PropTypes from 'prop-types';
 import {
   Tooltip,
@@ -18,11 +16,10 @@ import {
   TablePagination,
   TableRow,
   TableContainer,
-  Select,
   MenuItem,
   Typography,
   useTheme,
-  CardHeader
+  CardHeader, CircularProgress
 } from '@mui/material';
 
 import Label from 'src/components/Label';
@@ -30,128 +27,57 @@ import { Order, OrderStatus } from 'src/models/crypto_order';
 import EditTwoToneIcon from '@mui/icons-material/EditTwoTone';
 import DeleteTwoToneIcon from '@mui/icons-material/DeleteTwoTone';
 import BulkActions from './BulkActions';
+import {useAppDispatch, useAppSelector} from "../../../../../redux/hooks";
+import {RootState} from "../../../../../redux/store";
+import {deleteBill, getBills, getProductByPage, updateBill} from "../../../../../redux/features/productSlice";
+import {IBill, IProduct} from "../../../../../interfaces/product.interface";
+import {Link} from "react-router-dom";
+import {Button, Form, Input, Modal, Popconfirm} from "antd";
+import { Select, Space } from 'antd';
+import type { SelectProps } from 'antd';
 
-interface RecentOrdersTableProps {
-  className?: string;
-  Orders: Order[];
-}
-
-interface Filters {
-  status?: OrderStatus;
-}
-
-const getStatusLabel = (OrderStatus: OrderStatus): JSX.Element => {
-  const map = {
-    failed: {
-      text: 'Failed',
-      color: 'error'
-    },
-    completed: {
-      text: 'Completed',
-      color: 'success'
-    },
-    pending: {
-      text: 'Pending',
-      color: 'warning'
-    }
-  };
-
-  const { text, color }: any = map[OrderStatus];
-
-  return <Label color={color}>{text}</Label>;
-};
-
-const applyFilters = (
-  Orders: Order[],
-  filters: Filters
-): Order[] => {
-  return Orders.filter((Order) => {
-    let matches = true;
-
-    if (filters.status && Order.status !== filters.status) {
-      matches = false;
-    }
-
-    return matches;
-  });
-};
-
-const applyPagination = (
-  Orders: Order[],
-  page: number,
-  limit: number
-): Order[] => {
-  return Orders.slice(page * limit, page * limit + limit);
-};
-
-const RecentOrdersTable: FC<RecentOrdersTableProps> = ({ Orders }) => {
-  const [selectedOrders, setSelectedOrders] = useState<string[]>(
-    []
+const ListOrdersTable = () => {
+  const [selectedBill, setSelectedBill] = useState<string[]>(
+      []
   );
-  const selectedBulkActions = selectedOrders.length > 0;
+  const selectedBulkActions = selectedBill.length > 0;
   const [page, setPage] = useState<number>(0);
+  const [open, setOpen] = useState<boolean>(false);
   const [limit, setLimit] = useState<number>(5);
-  const [filters, setFilters] = useState<Filters>({
-    status: null
-  });
+  const [status, setStatus] = useState('');
+  const [id, setId] = useState(0);
 
-  const statusOptions = [
-    {
-      id: 'all',
-      name: 'All'
-    },
-    {
-      id: 'completed',
-      name: 'Completed'
-    },
-    {
-      id: 'pending',
-      name: 'Pending'
-    },
-    {
-      id: 'failed',
-      name: 'Failed'
-    }
-  ];
 
-  const handleStatusChange = (e: ChangeEvent<HTMLInputElement>): void => {
-    let value = null;
+  useEffect(() => {
+    dispatch(getBills())
+  }, [])
 
-    if (e.target.value !== 'all') {
-      value = e.target.value;
-    }
+  const bills = useAppSelector((root: RootState) => root.product.bills)
+  const handleSelectAllCryptoOrders = (
+      event: ChangeEvent<HTMLInputElement>
+  ): void => {
 
-    setFilters((prevFilters) => ({
-      ...prevFilters,
-      status: value
-    }));
   };
 
-  const handleSelectAllOrders = (
-    event: ChangeEvent<HTMLInputElement>
+  const handleSelectOneCryptoOrder = (
+      event: ChangeEvent<HTMLInputElement>,
+      cryptoOrderId: string
   ): void => {
-    setSelectedOrders(
-      event.target.checked
-        ? Orders.map((Order) => Order.id)
-        : []
-    );
-  };
-
-  const handleSelectOneOrder = (
-    event: ChangeEvent<HTMLInputElement>,
-    OrderId: string
-  ): void => {
-    if (!selectedOrders.includes(OrderId)) {
-      setSelectedOrders((prevSelected) => [
+    if (!selectedBill.includes(cryptoOrderId)) {
+      setSelectedBill((prevSelected) => [
         ...prevSelected,
-        OrderId
+        cryptoOrderId
       ]);
     } else {
-      setSelectedOrders((prevSelected) =>
-        prevSelected.filter((id) => id !== OrderId)
+      setSelectedBill((prevSelected) =>
+          prevSelected.filter((id) => id !== cryptoOrderId)
       );
     }
   };
+
+
+  const options: SelectProps['options'] = [{label: "PENDING", value: "PENDING"},
+    {label: "CANCEL", value: "CANCEL"}, {label: "COMPLETED", value: "COMPLETED"}, {label: "FAIL", value: "FAIL"}];
 
   const handlePageChange = (event: any, newPage: number): void => {
     setPage(newPage);
@@ -160,207 +86,235 @@ const RecentOrdersTable: FC<RecentOrdersTableProps> = ({ Orders }) => {
   const handleLimitChange = (event: ChangeEvent<HTMLInputElement>): void => {
     setLimit(parseInt(event.target.value));
   };
-
-  const filteredOrders = applyFilters(Orders, filters);
-  const paginatedOrders = applyPagination(
-    filteredOrders,
-    page,
-    limit
-  );
-  const selectedSomeOrders =
-    selectedOrders.length > 0 &&
-    selectedOrders.length < Orders.length;
-  const selectedAllOrders =
-    selectedOrders.length === Orders.length;
   const theme = useTheme();
+  const dispatch = useAppDispatch();
+  const applyPagination = (): IBill[] => {
+    return bills;
+  };
 
+  const handleSubmit = (e) => {
+    let formData = new FormData();    //formdata object
+
+    formData.append("status", e.status)
+    formData.append("id", id.toString())
+    dispatch(updateBill(formData)).then(() => {
+      setOpen(false)
+      dispatch(getBills())
+    })
+  }
+
+  const handleDelete = (e) => {
+    dispatch(deleteBill(e)).then(() => {
+      dispatch(getBills())
+    })
+  }
+
+  console.log(bills)
   return (
-    <Card>
-      {selectedBulkActions && (
-        <Box flex={1} p={2}>
-          <BulkActions />
-        </Box>
-      )}
-      {!selectedBulkActions && (
-        <CardHeader
-          action={
-            <Box width={150}>
-              <FormControl fullWidth variant="outlined">
-                <InputLabel>Status</InputLabel>
-                <Select
-                  value={filters.status || 'all'}
-                  onChange={handleStatusChange}
-                  label="Status"
-                  autoWidth
-                >
-                  {statusOptions.map((statusOption) => (
-                    <MenuItem key={statusOption.id} value={statusOption.id}>
-                      {statusOption.name}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+      <Card>
+        {selectedBulkActions && (
+            <Box flex={1} p={2}>
+              <BulkActions />
             </Box>
-          }
-          title="Recent Orders"
-        />
-      )}
-      <Divider />
-      <TableContainer>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell padding="checkbox">
-                <Checkbox
-                  color="primary"
-                  checked={selectedAllOrders}
-                  indeterminate={selectedSomeOrders}
-                  onChange={handleSelectAllOrders}
-                />
-              </TableCell>
-              <TableCell>Order Details</TableCell>
-              <TableCell>Order ID</TableCell>
-              <TableCell>Source</TableCell>
-              <TableCell align="right">Amount</TableCell>
-              <TableCell align="right">Status</TableCell>
-              <TableCell align="right">Actions</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {paginatedOrders.map((Order) => {
-              const isOrderSelected = selectedOrders.includes(
-                Order.id
-              );
-              return (
-                <TableRow
-                  hover
-                  key={Order.id}
-                  selected={isOrderSelected}
-                >
-                  <TableCell padding="checkbox">
-                    <Checkbox
-                      color="primary"
-                      checked={isOrderSelected}
-                      onChange={(event: ChangeEvent<HTMLInputElement>) =>
-                        handleSelectOneOrder(event, Order.id)
-                      }
-                      value={isOrderSelected}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Typography
-                      variant="body1"
-                      fontWeight="bold"
-                      color="text.primary"
-                      gutterBottom
-                      noWrap
+        )}
+        {!selectedBulkActions && (
+            <CardHeader
+                action={
+                  <Box width={150}>
+
+                  </Box>
+                }
+                title="Transactions List"
+            />
+        )}
+        <Divider />
+        <TableContainer>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>Order ID</TableCell>
+                <TableCell>Product</TableCell>
+                <TableCell>Username</TableCell>
+                <TableCell>Phone</TableCell>
+                <TableCell align="center">Address</TableCell>
+                <TableCell>Price</TableCell>
+                <TableCell align="right">Status</TableCell>
+                <TableCell align="right">Actions</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {bills ? applyPagination().map((it) => {
+                return (
+                    <TableRow
+                        hover
+                        key={it.id}
                     >
-                      {Order.orderDetails}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" noWrap>
-                      {format(Order.orderDate, 'MMMM dd yyyy')}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Typography
-                      variant="body1"
-                      fontWeight="bold"
-                      color="text.primary"
-                      gutterBottom
-                      noWrap
-                    >
-                      {Order.orderID}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Typography
-                      variant="body1"
-                      fontWeight="bold"
-                      color="text.primary"
-                      gutterBottom
-                      noWrap
-                    >
-                      {Order.sourceName}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" noWrap>
-                      {Order.sourceDesc}
-                    </Typography>
-                  </TableCell>
-                  <TableCell align="right">
-                    <Typography
-                      variant="body1"
-                      fontWeight="bold"
-                      color="text.primary"
-                      gutterBottom
-                      noWrap
-                    >
-                      {Order.amount}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" noWrap>
-                      {numeral(Order.amount).format(
-                        `${Order.currency}0,0.00`
-                      )}
-                    </Typography>
-                  </TableCell>
-                  <TableCell align="right">
-                    {getStatusLabel(Order.status)}
-                  </TableCell>
-                  <TableCell align="right">
-                    {Order.status.toLocaleLowerCase() != "completed"
-                        ? <Tooltip title="Edit Order" arrow>
-                      <IconButton
-                          sx={{
-                            '&:hover': {
-                              background: theme.colors.primary.lighter
-                            },
-                            color: theme.palette.primary.main
-                          }}
-                          color="inherit"
-                          size="small"
-                      >
-                        <EditTwoToneIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip> : <></>}
-                    <Tooltip title="Delete Order" arrow>
-                      <IconButton
-                        sx={{
-                          '&:hover': { background: theme.colors.error.lighter },
-                          color: theme.palette.error.main
-                        }}
-                        color="inherit"
-                        size="small"
-                      >
-                        <DeleteTwoToneIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
-      </TableContainer>
-      <Box p={2}>
-        <TablePagination
-          component="div"
-          count={filteredOrders.length}
-          onPageChange={handlePageChange}
-          onRowsPerPageChange={handleLimitChange}
-          page={page}
-          rowsPerPage={limit}
-          rowsPerPageOptions={[5, 10, 25, 30]}
-        />
-      </Box>
-    </Card>
+                      <TableCell>
+                        <Typography
+                            variant="body1"
+                            fontWeight="bold"
+                            color="text.primary"
+                            gutterBottom
+                            noWrap
+                        >
+                          {it.id}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <div className={'flex flex-col max-h-[100px] overflow-scroll'}>
+                          {it.carts.map(it =>
+                              <ProductOrder data={it} />
+                          )}
+                          </div>
+                      </TableCell>
+                      <TableCell>
+                        <Typography
+                            variant="body1"
+                            fontWeight="bold"
+                            color="text.primary"
+                            gutterBottom
+                            noWrap
+                        >
+                          {it.user.name}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography
+                            variant="body1"
+                            fontWeight="bold"
+                            color="text.primary"
+                            gutterBottom
+                            noWrap
+                        >
+                          {it.user.phone}
+                        </Typography>
+                      </TableCell>
+                      <TableCell align="right">
+                        {it.address}
+                      </TableCell>
+                      <TableCell>
+                        {it.price}
+                      </TableCell>
+                      <TableCell align="right">
+                        {it.billStatus}
+                      </TableCell>
+                      <TableCell align="right">
+                        <Tooltip title="Edit Product" arrow>
+                          <IconButton
+                              sx={{
+                                '&:hover': {
+                                  background: theme.colors.primary.lighter
+                                },
+                                color: theme.palette.primary.main
+                              }}
+                              color="inherit"
+                              size="small"
+                              onClick={() => {
+                                setOpen(true)
+                                setStatus(it.billStatus)
+                                setId(it.id)
+                              }}
+                          >
+                            <EditTwoToneIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                        <Popconfirm
+                            title="Delete the task"
+                            description="Are you sure to delete this task?"
+                            onConfirm={() => handleDelete(it.id)}
+                            okText="Yes"
+                            cancelText="No"
+                        >
+                          <IconButton
+                              sx={{
+                                '&:hover': { background: theme.colors.error.lighter },
+                                color: theme.palette.error.main
+                              }}
+                              color="inherit"
+                              size="small"
+                          >
+                            <DeleteTwoToneIcon fontSize="small" />
+                          </IconButton>
+                        </Popconfirm>
+                      </TableCell>
+                    </TableRow>
+                );
+              }) : <TableRow><TableCell><CircularProgress /></TableCell></TableRow>}
+            </TableBody>
+          </Table>
+        </TableContainer>
+        <Box p={2}>
+          <TablePagination
+              component="div"
+              count={bills ? bills.length : limit}
+              onPageChange={handlePageChange}
+              onRowsPerPageChange={handleLimitChange}
+              page={page}
+              rowsPerPage={limit}
+              rowsPerPageOptions={[5, 10, 25, 30]}
+          />
+        </Box>
+
+        <Modal
+            open={open}
+            title={"Edit state transaction"}
+            centered={true}
+            onCancel={() => setOpen(false)}
+            footer={(_, { OkBtn, CancelBtn }) => (
+                <>
+                  <Button form={'user-form'} type="primary" htmlType="submit">
+                    Submit
+                  </Button>
+                </>
+            )}
+        >
+          <Form id={'user-form'} onFinish={handleSubmit} initialValues={{status: status}}>
+            <Form.Item
+                name={"status"}
+            >
+              <Select
+                  allowClear
+                  style={{ width: '100%' }}
+                  placeholder="Please select status"
+                  onChange={() => {}}
+                  options={options}
+              />
+            </Form.Item>
+          </Form>
+        </Modal>
+      </Card>
   );
 };
 
-RecentOrdersTable.propTypes = {
-  Orders: PropTypes.array.isRequired
+function ProductOrder(props: any) {
+  console.log(props, 'ssss')
+  return (
+      <div className="flex h-full items-center w-[300px] max-h-[100px] justify-around">
+        <div className="w-[50px]">
+            <a className="product-images1  pos-relative embed-responsive embed-responsive-1by1" title="Trà Gạo Lứt Đông Trùng Wise Food 300g, 20 Gói /Hộp Giảm Stress Hiệu Quả">
+              <img className="w-full" src={props?.data?.foods?.imgs[0]} />
+            </a>
+        </div>
+        <div className="product-cart-infor flex justify-between w-7/12 border-y-green-900 ml-5">
+          <div className="w-full flex items-center">
+            <h3 className="product-name">
+              <p className="text-gray-700 text-sm">
+                {props?.data?.foods?.name}
+              </p>
+            </h3>
+            <span className="variant-title font-semibold ml-5">{props?.data?.quantity}</span>
+          </div>
+        </div>
+      </div>
+  )
+}
+
+ListOrdersTable.propTypes = {
+  cryptoOrders: PropTypes.array.isRequired
 };
 
-RecentOrdersTable.defaultProps = {
-  Orders: []
+ListOrdersTable.defaultProps = {
+  cryptoOrders: []
 };
 
-export default RecentOrdersTable;
+export default ListOrdersTable;

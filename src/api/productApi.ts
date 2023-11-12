@@ -9,7 +9,7 @@ class ProductApi {
   }
 
   async get(_param: Query): Promise<ApiListResponse<IProduct>> {
-    return Api.GET(this.baseUrl + '/get', _param);
+    return Api.GET(this.baseUrl + `/get?page=${_param.page}&limit=${_param.limit}`, _param);
   }
   async getBlogs(
       _param: Query,
@@ -34,6 +34,12 @@ class ProductApi {
       _param: number,
   ): Promise<ApiResponse<IProduct>> {
     return Api.GET(this.baseUrl + `/${_param}`);
+  }
+
+  async deleteOne(
+      _param: number,
+  ): Promise<ApiResponse<any>> {
+    return Api.DELETE(this.baseUrl + `/delete-product/${_param}`);
   }
 }
 

@@ -46,6 +46,7 @@ function DiscountDetail() {
         fetchData(Number(id));
       } else navigate('/404');
     } else {
+      setIsHide(false)
       setError(null);
     }
   }, [id]);

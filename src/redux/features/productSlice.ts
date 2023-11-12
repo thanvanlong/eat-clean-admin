@@ -4,10 +4,12 @@ import { toast } from 'react-toastify';
 import productApi from "../../api/productApi";
 import {IRegisterData} from "../../interfaces";
 import authApi from "../../api/authApi";
-import {IBlog, ICategory, IProduct} from "../../interfaces/product.interface";
+import {IBill, IBlog, ICategory, IProduct} from "../../interfaces/product.interface";
 import {LoadingStatus} from "../../enums/enum";
 import {toastOption} from "../../configs/notification.config";
 import blogApi from "../../api/blogApi";
+import billApi from "../../api/billApi";
+import statsApi from "../../api/statsApi";
 
 
 export const getProductByPage = createAsyncThunk(
@@ -32,6 +34,62 @@ export const getBlogs = createAsyncThunk(
     }
 );
 
+export const getBills = createAsyncThunk(
+    'products/getBill',
+    async (thunkAPI) => {
+        const response = await billApi.get();
+        console.log(response);
+        if (!response.success)
+            throw { message: response.message, errorCode: response.errorCode };
+        return response.data;
+    }
+);
+
+
+export const getTotalRevenue = createAsyncThunk(
+    'products/getTotal',
+    async (thunkAPI) => {
+        const response = await statsApi.getTotalRevenue();
+        console.log(response);
+        if (!response.success)
+            throw { message: response.message, errorCode: response.errorCode };
+        return response.data;
+    }
+);
+
+export const getCategoryRevenue = createAsyncThunk(
+    'products/getCategoryRevenue',
+    async (thunkAPI) => {
+        const response = await statsApi.getCategoryRevenue();
+        console.log(response);
+        if (!response.success)
+            throw { message: response.message, errorCode: response.errorCode };
+        return response.data;
+    }
+);
+
+
+export const getDaysRevenue = createAsyncThunk(
+    'products/getDaysRevenue',
+    async (thunkAPI) => {
+        const response = await statsApi.getDaysRevenue();
+        console.log(response);
+        if (!response.success)
+            throw { message: response.message, errorCode: response.errorCode };
+        return response.data;
+    }
+);
+
+// export const exportReport = createAsyncThunk(
+//     'stats/export',
+//     async (input: any, thunkAPI) => {
+//         const response = await statsApi.exportReport(input);
+//         console.log(response);
+//         if (!response.success)
+//             throw { message: response.message, errorCode: response.errorCode };
+//         return response.data;
+//     }
+// );
 export const getCategory = createAsyncThunk(
     "products/category",
     async (thunkAPI) => {
@@ -72,6 +130,16 @@ export const deleteBlog = createAsyncThunk(
     }
 );
 
+export const deleteProduct = createAsyncThunk(
+    "get/blog",
+    async (input: number, thunkAPI) => {
+        const response = await productApi.deleteOne(input)
+        if (!response.success)
+            throw { message: response.message, errorCode: response.errorCode };
+        return response.data;
+    }
+);
+
 export const createProduct = createAsyncThunk(
     "products/create",
     async (input: FormData, thunkAPI) => {
@@ -103,6 +171,26 @@ export const updateBlog = createAsyncThunk(
     }
 );
 
+export const updateBill = createAsyncThunk(
+    "bill/update",
+    async (input: FormData, thunkAPI) => {
+        const response = await billApi.updateBill(input)
+        if (!response.success)
+            throw { message: response.message, errorCode: response.errorCode };
+        return response.data;
+    }
+);
+
+export const deleteBill = createAsyncThunk(
+    "bill/update",
+    async (input: number, thunkAPI) => {
+        const response = await billApi.deleteOne(input)
+        if (!response.success)
+            throw { message: response.message, errorCode: response.errorCode };
+        return response.data;
+    }
+);
+
 export const createBlog = createAsyncThunk(
     "products/create",
     async (input: FormData, thunkAPI) => {
@@ -120,9 +208,14 @@ export interface ProductState {
     product: IProduct | null;
     categories: ICategory[] | null;
     blogs: IBlog[] | null;
+    bills: IBill[] | null;
     blog: IBlog | null;
     error: ErrorResponse | null;
     loading: LoadingStatus;
+    totalRevenue: number;
+    monthRevenue: number[];
+    daysRevenue: any;
+    categoryRevenue: any;
     metadata: IMetadata | null;
 }
 
@@ -131,9 +224,14 @@ const initialState: ProductState = {
     product: null,
     categories: null,
     blogs: null,
+    bills: null,
     blog: null,
     error: null,
     loading: LoadingStatus.Pending,
+    totalRevenue: 0,
+    daysRevenue: null,
+    categoryRevenue: null,
+    monthRevenue: [],
     metadata: null,
 };
 
@@ -158,6 +256,11 @@ const productSlice = createSlice({
             state.blogs = action.payload.results;
             state.blog = null;
         })
+        .addCase(getTotalRevenue.fulfilled, (state, action) => {
+            if (action.payload == null) return;
+            state.totalRevenue = action.payload.reduce((accumulator, currentValue) => accumulator + currentValue, 0);
+            state.monthRevenue = action.payload
+        })
         .addCase(getProductById.fulfilled, (state, action) => {
             if (action.payload == null) return;
             state.product = action.payload;
@@ -165,6 +268,19 @@ const productSlice = createSlice({
         .addCase(getBlogById.fulfilled, (state, action) => {
             if (action.payload == null) return;
             state.blog = action.payload;
+        })
+        .addCase(getBills.fulfilled, (state, action) => {
+            if (action.payload == null) return;
+            state.bills = action.payload.results;
+            console.log(action.payload)
+        })
+        .addCase(getCategoryRevenue.fulfilled, (state, action) => {
+            if (action.payload == null) return;
+            state.categoryRevenue = action.payload;
+        })
+        .addCase(getDaysRevenue.fulfilled, (state, action) => {
+            if (action.payload == null) return;
+            state.daysRevenue = action.payload;
         })
       .addMatcher(
         (action) => action.type.includes('rejected'),

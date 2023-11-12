@@ -27,6 +27,27 @@ export const requestRegister = createAsyncThunk(
   }
 );
 
+
+export const updateUser = createAsyncThunk(
+    'auth/update',
+    async (input: any, thunkAPI) => {
+        const response = await authApi.update(input);
+        if (!response.success)
+            throw { message: response.message, errorCode: response.errorCode };
+        return response.data;
+    }
+);
+
+export const deleteUser = createAsyncThunk(
+    'auth/update',
+    async (input: any, thunkAPI) => {
+        const response = await authApi.deleteOne(input);
+        if (!response.success)
+            throw { message: response.message, errorCode: response.errorCode };
+        return response.data;
+    }
+);
+
 export const listUser = createAsyncThunk(
   'user/list',
   async (input: Query, thunkAPI) => {
