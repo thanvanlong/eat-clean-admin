@@ -62,20 +62,7 @@ const authSlice = createSlice({
       .addCase(addItem.fulfilled, (state, action) => {
         state.cart = action.payload;
       })
-      .addMatcher(
-        (action) => action.type.includes('rejected'),
-        (state, action) => {
-          console.log(action);
 
-          state.error = {
-            message: action.payload?.message ?? action.error.message,
-            errorCode: action.payload?.errorCode ?? action.error.code
-          };
-          state.loading = LoadingStatus.Rejected;
-
-          toast.error(state.error.message, toastOption);
-        }
-      )
       .addMatcher(
         (action) => action.type.includes('fulfilled'),
         (state, action) => {

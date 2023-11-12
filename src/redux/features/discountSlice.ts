@@ -75,20 +75,6 @@ const discountsSlide = createSlice({
         state.loading = LoadingStatus.Fulfilled;
       })
       .addMatcher(
-        (action) => action.type.includes('rejected'),
-        (state, action) => {
-          console.log(action.type);
-
-          state.error = {
-            message: action.payload?.message ?? action.error.message,
-            errorCode: action.payload?.errorCode ?? action.error.code
-          };
-          state.loading = LoadingStatus.Rejected;
-
-          toast.error(state.error.message, toastOption);
-        }
-      )
-      .addMatcher(
         (action) => action.type.includes('fulfilled'),
         (state, action) => {
           state.error = null;

@@ -51,7 +51,7 @@ const ListProductsTable = () => {
 
 
   useEffect(() => {
-    dispatch(getProductByPage({page: 0, limit: 100}))
+    dispatch(getProductByPage({page: 0, limit: 30}))
   }, [])
 
   const products = useAppSelector((root: RootState) => root.product.products)
@@ -87,7 +87,7 @@ const ListProductsTable = () => {
 
   const handleDelete = (id) => {
     dispatch(deleteProduct(id)).then(() => {
-      dispatch(getProductByPage({page: 0, limit: 100}))
+      dispatch(getProductByPage({page: 0, limit: 30}))
     })
   }
 

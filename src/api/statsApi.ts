@@ -21,7 +21,7 @@ class StatsApi {
     }
 
     async exportReport(input: any) {
-        const response =  await Api.POST<any>(this.baseUrl + `/export/report`, input);
+        const response =  await Api.POST<any>(this.baseUrl + `/export/report`, input, {responseType: 'blob' });
         const href = window.URL.createObjectURL(new Blob([response]));
 
         const link = document.createElement("a");

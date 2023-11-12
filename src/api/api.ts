@@ -69,7 +69,7 @@ class Api {
 
   public async POST<T>(url: string, body: any, params?: any): Promise<T> {
     const api = await this.AXIOS();
-    return api.post(url, body, { params: params, responseType: 'blob' });
+    return api.post(url, body, { ...params });
   }
 
   public async PUT<T>(url: string, body: any, params?: any): Promise<T> {
