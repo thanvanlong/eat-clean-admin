@@ -43,7 +43,7 @@ const ListOrdersTable = () => {
   const selectedBulkActions = selectedBill.length > 0;
   const [page, setPage] = useState<number>(0);
   const [open, setOpen] = useState<boolean>(false);
-  const [limit, setLimit] = useState<number>(5);
+  const [limit, setLimit] = useState<number>(100);
   const [status, setStatus] = useState('');
   const [id, setId] = useState(0);
 

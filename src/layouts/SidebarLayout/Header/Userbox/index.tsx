@@ -123,7 +123,7 @@ function HeaderUserbox() {
         <Box sx={{ m: 1 }}>
           <Button color="primary"  onClick={() => {
             localStorage.clear()
-            navigate("/login")
+            window.location.href = "http://localhost:3000/login"
           }} fullWidth>
             <LockOpenTwoToneIcon sx={{ mr: 1 }} />
             Sign out

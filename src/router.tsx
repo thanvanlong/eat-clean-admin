@@ -83,11 +83,11 @@ const routes: RouteObject[] = [
     children: [
       {
         path: '/',
-        element: login ? <Navigate to={'/dashboards/overview'} /> : <Login />
+        element: localStorage.getItem('token') ? <Navigate to={'/dashboards/overview'} /> : <Login />
       },
       {
         path: 'login',
-        element: login ? <Navigate to={'/dashboards/overview'} /> : <Login />
+        element: localStorage.getItem('token') ? <Navigate to={'/dashboards/overview'} /> : <Login />
       },
       {
         path: '*',

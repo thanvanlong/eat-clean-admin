@@ -272,8 +272,8 @@ function SidebarMenu() {
                 <Button
                   disableRipple
                   component={RouterLink}
-                  onClick={closeSidebar}
-                  to="/account/logout"
+                  onClick={() => {localStorage.clear()}}
+                  to="/login"
                   startIcon={<ExitToAppOutlinedIcon />}
                 >
                   Đăng xuất

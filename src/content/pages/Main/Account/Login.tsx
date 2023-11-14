@@ -13,6 +13,7 @@ import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
   import {useAppDispatch} from "../../../../redux/hooks";
   import {requestLogin} from "../../../../redux/features/authSlice";
+  import {toast} from "react-toastify";
 
 const OverviewWrapper = styled(Box)(
   () => `
@@ -30,12 +31,12 @@ function Login() {
   const handleSubmit = (e) => {
     dispatch(requestLogin(e)).unwrap()
         .then((it) => {
-          // if (it.roles.includes("ROLE_ADMIN")) {
-          //   localStorage.setItem("token", it.accessToken)
-          //   navigate("/dashboards/overview")
-          // }
-          localStorage.setItem("token", it.accessToken)
-          navigate("/dashboards/overview")
+          if (it.roles.includes("ROLE_ADMIN")) {
+            localStorage.setItem("token", it.accessToken)
+            window.location.href = "http://localhost:3000/dashboards/overview";
+          } else {
+            toast.error("Vui lòng đăng nhập lại")
+          }
 
         })
   }
